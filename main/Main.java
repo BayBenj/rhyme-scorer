@@ -19,16 +19,6 @@ public abstract class Main {
 
 	public static String rootPath;
 
-//	public static MannerTable normalMannerTable = new MannerTable();
-//	public static PlaceTable normalPlaceTable = new PlaceTable();
-//	public static VoicingTable normalVoicingTable = new VoicingTable();
-//	public static ThreeTables normalTables = new ThreeTables(normalMannerTable, normalPlaceTable, normalVoicingTable);
-//
-//	public static MannerTable rhymeMannerTable = new MannerTable();
-//	public static PlaceTable rhymePlaceTable = new PlaceTable();
-//	public static VoicingTable rhymeVoicingTable = new VoicingTable();
-//	public static ThreeTables rhymeTables = new ThreeTables(rhymeMannerTable, rhymePlaceTable, rhymeVoicingTable);
-
 	public static void main(String[] args) throws IOException {
 		setupRootPath();
 		DataContainer.setupDict();
@@ -108,7 +98,7 @@ public abstract class Main {
 
 	public static MonoTables findMonoCountsOnly(Dataset dataset) {
 		MonoConsonantTables consonantResult = new MonoConsonantTables(new MonoMannerTable(), new MonoPlaceTable(), new MonoVoicingTable());
-		VowelTables vowelResult = new VowelTables(new HeightTable(), new FrontnessTable(), new RoundnessTable(), new TensionTable());
+		VowelTables vowelResult = new VowelTables(new HeightTable(), new FrontnessTable(), new RoundnessTable(), new TensionTable(), new StressTable());
 		for (Map.Entry<String,Set<String>> entry : dataset.entrySet()) {
 			WordSyllables r1 = DataContainer.dictionary.get(entry.getKey());
 			for (String s : entry.getValue()) {
@@ -158,7 +148,7 @@ public abstract class Main {
 
 	public static MultiTables findAllCounts(Dataset dataset, MonoConsonantTables monoLLTables) {
 		MultiConsonantTables consonantResult = new MultiConsonantTables(new MultiMannerTable(), new MultiPlaceTable(), new MultiVoicingTable());
-		VowelTables vowelResult = new VowelTables(new HeightTable(), new FrontnessTable(), new RoundnessTable(), new TensionTable());
+		VowelTables vowelResult = new VowelTables(new HeightTable(), new FrontnessTable(), new RoundnessTable(), new TensionTable(), new StressTable());
 		for (Map.Entry<String,Set<String>> entry : dataset.entrySet()) {
 			WordSyllables r1 = DataContainer.dictionary.get(entry.getKey());
 			for (String s : entry.getValue()) {
@@ -305,6 +295,7 @@ public abstract class Main {
 		tables.frontnessTable.fillCell(r1.phonemeEnum.getFrontness(),r2.phonemeEnum.getFrontness());
 		tables.roundnessTable.fillCell(r1.phonemeEnum.getRoundness(),r2.phonemeEnum.getRoundness());
 		tables.tensionTable.fillCell(r1.phonemeEnum.getTension(),r2.phonemeEnum.getTension());
+		tables.stressTable.fillCell(r1.stress,r2.stress);
 		return tables;
 	}
 

@@ -179,7 +179,7 @@ public enum PhonemeEnum {
     Vowels have 4 features:
     phonetics.Height - low, mid, high
     phonetics.Frontness - front, central, back
-    Tenseness - tense or lax
+    Tenseness - primary or secondary
     Rounding - round or not
      */
 
@@ -395,7 +395,7 @@ public enum PhonemeEnum {
 		return false;
 	}
 
-	//Lax / tense
+	//Lax / primary
 
 	public Tension getTension() {
 		if (this.isTense(this)) return Tension.TENSE;
@@ -405,7 +405,7 @@ public enum PhonemeEnum {
 	public static boolean isTense(PhonemeEnum p) {
 		//TODO check w/ mom
 		if (!p.isVowel()) return false;
-		//lax vowel phonemes
+		//secondary vowel phonemes
 		else if (p == IY ||
 				p == EY ||
 				p == UW ||

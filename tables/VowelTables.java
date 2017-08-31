@@ -8,12 +8,14 @@ public class VowelTables {
 	public FrontnessTable frontnessTable;
 	public RoundnessTable roundnessTable;
 	public TensionTable tensionTable;
+	public StressTable stressTable;
 
-	public VowelTables(HeightTable heightTable, FrontnessTable frontnessTable, RoundnessTable roundnessTable, TensionTable tensionTable) {
+	public VowelTables(HeightTable heightTable, FrontnessTable frontnessTable, RoundnessTable roundnessTable, TensionTable tensionTable, StressTable stressTable) {
 		this.heightTable = heightTable;
 		this.frontnessTable = frontnessTable;
 		this.roundnessTable = roundnessTable;
 		this.tensionTable = tensionTable;
+		this.stressTable = stressTable;
 	}
 
 	public static void printLogLikelihoods(VowelTables randoms, VowelTables rhymes) {
@@ -26,6 +28,8 @@ public class VowelTables {
 		RoundnessTable.printLogLikelihood(randoms.roundnessTable, rhymes.roundnessTable);
 		System.out.println("\nTension");
 		TensionTable.printLogLikelihood(randoms.tensionTable, rhymes.tensionTable);
+		System.out.println("\nStress");
+		StressTable.printLogLikelihood(randoms.stressTable, rhymes.stressTable);
 	}
 
 	public static VowelTables getLogLikelihoodTables(VowelTables randoms, VowelTables rhymes) {
@@ -65,7 +69,16 @@ public class VowelTables {
 			}
 		}
 
-		return new VowelTables(ll_heightTable, ll_frontnessTable, ll_roundnessTable, ll_tensionTable);
+		//stress
+		StressTable ll_stressTable = new StressTable();
+		for (int i = 0; i < randoms.stressTable.get_i_size(); i++) {
+			List<Double> list = ll_stressTable.get(i);
+			for (int j = 0; j < randoms.stressTable.get_j_size(); j++) {
+				if (i <= j) list.set(j, ProbabilityTable.computeLogLikelihood((int)randoms.stressTable.cell(i,j), randoms.stressTable.total(),(int)rhymes.stressTable.cell(i,j),rhymes.stressTable.total()));
+			}
+		}
+
+		return new VowelTables(ll_heightTable, ll_frontnessTable, ll_roundnessTable, ll_tensionTable, ll_stressTable);
 	}
 
 	public void LL_table_printLL() {
@@ -77,6 +90,8 @@ public class VowelTables {
 		roundnessTable.printLL();
 		System.out.println("\nTension:");
 		tensionTable.printLL();
+		System.out.println("\nStress:");
+		stressTable.printLL();
 	}
 
 	public void printProbabilities() {
@@ -89,6 +104,8 @@ public class VowelTables {
 		roundnessTable.printProbability();
 		System.out.println("\nTension");
 		tensionTable.printProbability();
+		System.out.println("\nStress:");
+		stressTable.printProbability();
 	}
 
 	public void printCounts() {
@@ -100,6 +117,8 @@ public class VowelTables {
 		this.roundnessTable.print();
 		System.out.println("\nTension:");
 		this.tensionTable.print();
+		System.out.println("\nStress:");
+		this.stressTable.print();
 	}
 
 	public void foldTables() {
@@ -107,6 +126,7 @@ public class VowelTables {
 		this.frontnessTable.foldDiagonally();
 		this.roundnessTable.foldDiagonally();
 		this.tensionTable.foldDiagonally();
+		this.stressTable.foldDiagonally();
 	}
 
 }

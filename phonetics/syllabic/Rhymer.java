@@ -1,6 +1,5 @@
 package phonetics.syllabic;
 
-import edu.cmu.sphinx.linguist.dictionary.Word;
 import genetic.Individual;
 import main.Main;
 import phonetics.*;
