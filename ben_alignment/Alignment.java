@@ -8,10 +8,20 @@ public class Alignment {
 
 	public List<ConsonantPhoneme> c1;
 	public List<ConsonantPhoneme> c2;
+	public int steps; //equal to length of c1 or c2
+	public double score;
+	public double normalizedScore;
+	public double[][] values;
+	public BackPointer[][] backPointers;
 
-	public Alignment(List<ConsonantPhoneme> c1, List<ConsonantPhoneme> c2) {
+	public Alignment(List<ConsonantPhoneme> c1, List<ConsonantPhoneme> c2, int steps, double score, double normalizedScore, double[][] values, BackPointer[][] backPointers) {
 		this.c1 = c1;
 		this.c2 = c2;
+		this.steps = steps;
+		this.score = score;
+		this.normalizedScore = normalizedScore;
+		this.values = values;
+		this.backPointers = backPointers;
 	}
 
 	@Override

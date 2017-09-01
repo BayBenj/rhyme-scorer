@@ -107,9 +107,9 @@ public abstract class ProbabilityTable extends ArrayList<ArrayList<Double>> {
 
 	public String gapName(int i) {
 		switch (i) {
-			case 0: return "b_g";
-			case 1: return "m_g";
-			case 2: return "e_g";
+			case 0: return "G1";
+			case 1: return "G2";
+			case 2: return "G3";
 		}
 		return null;
 	}

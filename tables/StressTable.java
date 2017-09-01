@@ -72,6 +72,17 @@ public class StressTable extends ProbabilityTable {
 		return -1;
 	}
 
+	public int getCoord(int s) {
+		switch (s) {
+			case 1:
+				return primary();
+			case 2:
+				return secondary();
+			default:
+				return none();
+		}
+	}
+
 	public String lineName(int i) {
 		switch (i) {
 			case 0: return "pri";

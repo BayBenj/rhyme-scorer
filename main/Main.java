@@ -9,6 +9,7 @@ import data.DataLoader;
 import data.Dataset;
 import phonetics.ConsonantPhoneme;
 import phonetics.VowelPhoneme;
+import phonetics.syllabic.LL_Rhymer;
 import phonetics.syllabic.Syllable;
 import phonetics.syllabic.SyllableList;
 import phonetics.syllabic.WordSyllables;
@@ -64,6 +65,10 @@ public abstract class Main {
 		randoms2.consonantTables.printCounts();
 		MultiConsonantTables multi_ll_tables = MultiConsonantTables.getLogLikelihoodTables(randoms2.consonantTables, rhymes2.consonantTables);
 		multi_ll_tables.LL_table_printLL();
+
+		MultiTables finalTables = new MultiTables(multi_ll_tables, mono_ll_vowel_tables);
+
+		LL_Rhymer.test(finalTables);
 	}
 
 	public static Dataset getRandomMatches() {
