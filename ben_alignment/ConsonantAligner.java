@@ -1,6 +1,5 @@
 package ben_alignment;
 
-import phonetics.PhonemeEnum;
 import tables.*;
 import phonetics.ConsonantPhoneme;
 import phonetics.ConsonantPronunciation;
@@ -11,12 +10,12 @@ import java.util.List;
 public abstract class ConsonantAligner {
 
 	public static Alignment align2ConsonantSequences(List<ConsonantPhoneme> c1, List<ConsonantPhoneme> c2, MultiConsonantTables ll_tables, double m_w, double p_w, double v_w) {
-		double[][] values = new double[c1.size() + 1][c2.size() + 1];
+		double[][] alignmentTable = new double[c1.size() + 1][c2.size() + 1];
 		BackPointer[][] backPointers = new BackPointer[c1.size() + 1][c2.size() + 1];
 		for (int i = 0; i < c1.size() + 1; i++) {
 			for (int j = 0; j < c2.size() + 1; j++) {
 				if (i == 0 && j == 0) {
-					values[i][j] = 0;
+					alignmentTable[i][j] = 0;
 					backPointers[i][j] = null;
 					continue;
 				}
@@ -28,12 +27,12 @@ public abstract class ConsonantAligner {
 					int p = ll_tables.placeTable.getCoord(ph.phonemeEnum.getPlace());
 					int v = ll_tables.voicingTable.getCoord(ph.phonemeEnum.isVoiced());
 					if (i == 0) {
-						values[i][j] = weightedSum(ll_tables, m_w, p_w, v_w, Gap.BEG, m, p, v) + values[i][j - 1];//TODO subtract instead?
+						alignmentTable[i][j] = weightedSum(ll_tables, m_w, p_w, v_w, Gap.BEG, m, p, v) + alignmentTable[i][j - 1];//TODO subtract instead?
 						backPointers[i][j] = BackPointer.LEFT;
 						continue;
 					}
 					if (j == 0) {
-						values[i][j] = weightedSum(ll_tables, m_w, p_w, v_w, Gap.BEG, m, p, v) + values[i - 1][j];//TODO subtract instead?
+						alignmentTable[i][j] = weightedSum(ll_tables, m_w, p_w, v_w, Gap.BEG, m, p, v) + alignmentTable[i - 1][j];//TODO subtract instead?
 						backPointers[i][j] = BackPointer.UP;
 						continue;
 					}
@@ -50,36 +49,53 @@ public abstract class ConsonantAligner {
 				int p2 = ll_tables.placeTable.getCoord(ph2.phonemeEnum.getPlace());
 				int v2 = ll_tables.voicingTable.getCoord(ph2.phonemeEnum.isVoiced());
 
-				double diag = weightedSum(ll_tables,p_w,m_w,v_w,m1,m2,p1,p2,v1,v2) + values[i - 1][j - 1];
-				double left = weightedSum(ll_tables,p_w,m_w,v_w,(i == c1.size() - 1 ? Gap.END : Gap.MID),m1,p1,v1) + values[i][j - 1];
-				double up = weightedSum(ll_tables,p_w,m_w,v_w,(j == c2.size() - 1 ? Gap.END : Gap.MID),m1,p1,v1) + values[i - 1][j];;
+				double diag = weightedSum(ll_tables,p_w,m_w,v_w,m1,m2,p1,p2,v1,v2) + alignmentTable[i - 1][j - 1];
+				double left = weightedSum(ll_tables,p_w,m_w,v_w,(i == c1.size() - 1 ? Gap.END : Gap.MID),m1,p1,v1) + alignmentTable[i][j - 1];
+				double up = weightedSum(ll_tables,p_w,m_w,v_w,(j == c2.size() - 1 ? Gap.END : Gap.MID),m1,p1,v1) + alignmentTable[i - 1][j];
 
 				if (diag >= left) {
 					if (diag >= up) {
-						values[i][j] = diag;
+						alignmentTable[i][j] = diag;
 						backPointers[i][j] = BackPointer.DIAG;
 					}
 					else {
-						values[i][j] = values[i - 1][j] + up;
+						alignmentTable[i][j] = alignmentTable[i - 1][j] + up;
 						backPointers[i][j] = BackPointer.UP;
 					}
 				}
 				else {
 					if (left >= up) {
-						values[i][j] = values[i][j - 1] + left;
+						alignmentTable[i][j] = alignmentTable[i][j - 1] + left;
 						backPointers[i][j] = BackPointer.LEFT;
 					}
 					else {
-						values[i][j] = values[i - 1][j] + up;
+						alignmentTable[i][j] = alignmentTable[i - 1][j] + up;
 						backPointers[i][j] = BackPointer.UP;
 					}
 				}
 			}
 		}
-		return backtrack(backPointers, c1, c2, values, ll_tables, m_w, p_w, v_w);
+		printAlignmentTable(c1,c2,alignmentTable);
+		return backtrack(backPointers, c1, c2, alignmentTable, ll_tables, m_w, p_w, v_w);
 	}
 
-	public static Alignment backtrack(BackPointer[][] backPointers, List<ConsonantPhoneme> c1, List<ConsonantPhoneme> c2, double[][] values, MultiConsonantTables ll_tables, double m_w, double p_w, double v_w) {
+	private static void printAlignmentTable(List<ConsonantPhoneme> c1, List<ConsonantPhoneme> c2, double[][] table) {
+		for (int i = 0; i < table[0].length; i++) {
+			if (i == 0) System.out.print("\t$\t");
+			else System.out.print(c2.get(i - 1) + "\t");
+		}
+		System.out.print("\n");
+		for (int i = 0; i < table.length; i++) {
+			if (i == 0) System.out.print("$\t");
+			else System.out.print(c1.get(i - 1) + "\t");
+			for (int j = 0; j < table[i].length; j++) {
+				System.out.print(Math.floor(table[i][j]*1000)/1000 + "\t");
+			}
+			System.out.print("\n");
+		}
+	}
+
+	private static Alignment backtrack(BackPointer[][] backPointers, List<ConsonantPhoneme> c1, List<ConsonantPhoneme> c2, double[][] alignmentTable, MultiConsonantTables scoringMatrices, double m_w, double p_w, double v_w) {
 		double totalScores = 0;
 		ConsonantPronunciation r1 = new ConsonantPronunciation();
 		ConsonantPronunciation r2 = new ConsonantPronunciation();
@@ -94,20 +110,23 @@ public abstract class ConsonantAligner {
 			//backtrack, build alignment backwards
 			switch (dir) {
 				case DIAG:
-					actualScore = values[i][j] - values[i - 1][j - 1];
+					double loggedVal = alignmentTable[i][j] - alignmentTable[i - 1][j - 1];
+					actualScore = deLog(loggedVal);
 					r1.add(0, c1.get(i - 1));
 					r2.add(0, c2.get(j - 1));
 					i--;
 					j--;
 					break;
 				case UP:
-					actualScore = values[i][j] - values[i - 1][j];
+					loggedVal = alignmentTable[i][j] - alignmentTable[i - 1][j];
+					actualScore = deLog(loggedVal);
 					r1.add(0, c1.get(i - 1));
 					r2.add(0, null);
 					i--;
 					break;
 				case LEFT:
-					actualScore = values[i][j] - values[i][j - 1];
+					loggedVal = alignmentTable[i][j] - alignmentTable[i][j - 1];
+					actualScore = deLog(loggedVal);
 					r1.add(0, null);
 					r2.add(0, c2.get(j - 1));
 					j--;
@@ -115,11 +134,23 @@ public abstract class ConsonantAligner {
 				default:
 					break;
 			}
-			double normalizedPairScore = ((actualScore / optimalPhonemeScore(r1.get(0), ll_tables, p_w, m_w, v_w)) + (actualScore / optimalPhonemeScore(r2.get(0), ll_tables, p_w, m_w, v_w))) / 2.0;
+			double normalizedPairScore;
+			if (r1.get(0) == null || r2.get(0) == null) {
+				if (r1.get(0) == null) {
+					normalizedPairScore = actualScore / optimalPhonemeScore(r2.get(0), scoringMatrices, p_w, m_w, v_w);
+				}
+				else {
+					normalizedPairScore = actualScore / optimalPhonemeScore(r1.get(0), scoringMatrices, p_w, m_w, v_w);
+				}
+			}
+			else {
+				normalizedPairScore = ((actualScore / optimalPhonemeScore(r1.get(0), scoringMatrices, p_w, m_w, v_w)) + (actualScore / optimalPhonemeScore(r2.get(0), scoringMatrices, p_w, m_w, v_w))) / 2.0;
+			}
 			totalScores += normalizedPairScore;
 			steps++;
 		}
-		return new Alignment(r1, r2, steps, values[c1.size() - 1][c2.size() - 1] / steps, totalScores / ((double)steps), values, backPointers);
+		Alignment result = new Alignment(r1, r2, steps, alignmentTable[c1.size()][c2.size()] / ((double)steps), totalScores / ((double)steps), alignmentTable, backPointers);
+		return result;
 	}
 
 	public static Alignment greedilyAlign2ConsonantSequences(List<ConsonantPhoneme> c1, List<ConsonantPhoneme> c2, MonoConsonantTables monoLLTables) {
@@ -208,24 +239,27 @@ public abstract class ConsonantAligner {
 	}
 
 	private static double weightedSum(MultiConsonantTables tables, double placeOfArticulationWeight, double mannerOfArticulationWeight, double voicingWeight, int m1, int m2, int p1, int p2, int v1, int v2) {
-		return (tables.placeTable.cell(p1,p2) * placeOfArticulationWeight) + (tables.mannerTable.cell(m1,m2) * mannerOfArticulationWeight) + (tables.voicingTable.cell(v1,v2) * voicingWeight);
+		return ((tables.placeTable.cell(p1,p2) * placeOfArticulationWeight) + (tables.mannerTable.cell(m1,m2) * mannerOfArticulationWeight) + (tables.voicingTable.cell(v1,v2) * voicingWeight)) / 3;//TODO id div by 3 correct?
 	}
 
 	private static double weightedSum(MultiConsonantTables tables, double placeOfArticulationWeight, double mannerOfArticulationWeight, double voicingWeight, Gap g, int m, int p, int v) {
 		int m2 = tables.mannerTable.getGapCoord(g);
 		int p2 = tables.placeTable.getGapCoord(g);
 		int v2 = tables.voicingTable.getGapCoord(g);
-		return (tables.placeTable.cell(p,p2) * placeOfArticulationWeight) + (tables.mannerTable.cell(m,m2) * mannerOfArticulationWeight) + (tables.voicingTable.cell(v,v2) * voicingWeight);
+		return ((tables.placeTable.cell(p,p2) * placeOfArticulationWeight) + (tables.mannerTable.cell(m,m2) * mannerOfArticulationWeight) + (tables.voicingTable.cell(v,v2) * voicingWeight) ) / 3;//TODO id div by 3 correct?
 	}
 
 	private static double optimalPhonemeScore(ConsonantPhoneme cp, MultiConsonantTables tables, double placeOfArticulationWeight, double mannerOfArticulationWeight, double voicingWeight) {
-		if (cp == null) return 0.0; //TODO is this correct??????
 		int m = tables.mannerTable.getCoord(cp.phonemeEnum.getManner());
 		int p = tables.placeTable.getCoord(cp.phonemeEnum.getPlace());
 		int v = tables.voicingTable.getCoord(cp.phonemeEnum.isVoiced());
-		double ll = weightedSum(tables, placeOfArticulationWeight, mannerOfArticulationWeight, voicingWeight, m,m, p,p, v,v);
-		double de_logged = Math.pow(Math.E,ll);
+		double result = weightedSum(tables, placeOfArticulationWeight, mannerOfArticulationWeight, voicingWeight, m,m, p,p, v,v);
+		double de_logged = deLog(result);
 		return de_logged;
+	}
+
+	private static double deLog(double d) {
+		return Math.pow(Math.E, d);
 	}
 
 }
@@ -240,4 +274,14 @@ For every aligned pair(ph1, ph2):
 	optimal = taken from table of phonemes against themselves
 
 Then take the mean of all pairs
+ */
+
+/*
+	Normalize vowel stuff
+	Re-code bad code
+	Ensure entire score is normalized
+	Switch to marginal probabilities for denominator of LL score, use RZ data instead of CMU iterator
+	Search thru serialized data, if all equal coda lengths, scrape again
+	Inspect RZ api for new endpoints
+
  */

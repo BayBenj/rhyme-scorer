@@ -61,13 +61,31 @@ public class LL_Rhymer {
 //	}
 
 	public static void test(MultiTables tables) {
+		System.out.println("\n\nTest 1");
 		String s1 = "hold";
 		String s2 = "molds";
 		List<WordSyllables> w1 = (Phoneticizer.getSyllables(s1));
 		List<WordSyllables> w2 = (Phoneticizer.getSyllables(s2));
 		LL_Rhymer temp = new LL_Rhymer(tables,1,1,1,1,1,1,1,1,1,1,1);
 		double score = temp.score2Words(w1.get(0),w2.get(0));
-		System.out.println("\n\nScore for f(" + s1 + ", " + s2 + ") = " + score);
+		System.out.println("\nScore for f(" + s1 + ", " + s2 + ") = " + score);
+
+		System.out.println("\n\nTest 2");
+		s1 = "bold";
+		s2 = "fold";
+		w1 = (Phoneticizer.getSyllables(s1));
+		w2 = (Phoneticizer.getSyllables(s2));
+		score = temp.score2Words(w1.get(0),w2.get(0));
+		System.out.println("\nScore for f(" + s1 + ", " + s2 + ") = " + score);
+
+		System.out.println("\n\nTest 3");
+		s1 = "station";
+		s2 = "bacon";
+		w1 = (Phoneticizer.getSyllables(s1));
+		w2 = (Phoneticizer.getSyllables(s2));
+		score = temp.score2Words(w1.get(0),w2.get(0));
+		System.out.println("\nScore for f(" + s1 + ", " + s2 + ") = " + score);
+
 	}
 
 //	public static double score2SyllablesByGaOptimizedWeights(Syllable s1, Syllable s2) {
@@ -93,15 +111,20 @@ public class LL_Rhymer {
 	public Double score2Words(WordSyllables word1, WordSyllables word2) {
 		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
 				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
-		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) return null;
+		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
+			System.out.println("ERROR: rhyme tails of of unequal length");
+			return null;
+		}
 		else {
+			SyllableList rhymeTail1 = word1.getRhymeTailFromStress();
+			SyllableList rhymeTail2 = word2.getRhymeTailFromStress();
 			double total = 0;
-			for (int i = 0; i < word1.getRhymeTailFromStress().size(); i++) {
-				Syllable s1 = word1.get(i);
-				Syllable s2 = word2.get(i);
+			for (int i = 0; i < rhymeTail1.size(); i++) {
+				Syllable s1 = rhymeTail1.get(i);
+				Syllable s2 = rhymeTail2.get(i);
 				total += score2Syllables(s1, s2);
 			}
-			return new Double(total / (double)word1.getRhymeTailFromStress().size());
+			return new Double(total / (double)rhymeTail1.size());
 		}
 	}
 
