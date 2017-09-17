@@ -2,7 +2,10 @@ package genetic;
 
 import data.DataContainer;
 import data.Dataset;
+import main.Main;
+import tables.MultiTables;
 
+import java.io.IOException;
 import java.util.*;
 
 public class GeneticMain {
@@ -11,8 +14,8 @@ public class GeneticMain {
 	private final static int topIndividualN = 20;
 	private final static int offspringN = 100;
 	private final static int maxGenerations = 10000;
-	public final static double fitnessThreshold = 0.9;
-	private final static int rzCorpusSize = 56000;
+	public final static double fitnessThreshold = 0.5;
+	private final static int rzCorpusSize = 10000;
 	public static double temp = 1.00;
 	private final static double coolingRate = 0.001;
 	public static Dataset data;
@@ -20,7 +23,17 @@ public class GeneticMain {
 	public static void main(String[] args) {
 		long startTime = System.nanoTime();
 
-		data = DataContainer.rhymeZonePerfRhymes;
+		try {
+			Main.main(null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		//set scoring tables
+		MultiTables tables = Main.finalTables;
+		Individual.tables = tables;
+
+		data = DataContainer.rhymeZoneAdvanced;
 
 		Map<String, Double> values = new HashMap<>();
 
@@ -52,18 +65,19 @@ public class GeneticMain {
 //
 //		values.put("stress", 00.0);
 
-		//values.put("frontness", 125.0);//always 100
-		values.put("height", 87.89145327765064);
+		values.put("frontness", 100.0);
+		values.put("height", 100.0);
+		values.put("roundness", 100.0);
+		values.put("tension", 100.0);
+		values.put("stress", 100.0);
 
-		//values.put("place_of_articulation", 110.0);//always 100
-		values.put("manner_of_articulation", 93.74256357399545);
-		values.put("voicing", 27.754425336501495);
+		values.put("manner", 100.0);
+		values.put("place", 100.0);
+		values.put("voicing", 100.0);
 
-		values.put("onset", 5.519934718254886);
-		//values.put("nucleus", 60.0);//always 100
-		values.put("coda", 125.45080735803514);
-
-		values.put("stress", 17.24887448289867);
+		values.put("onset", 100.0);
+		values.put("nucleus", 100.0);
+		values.put("coda", 100.0);
 
 		TreeSet<Individual> topIndividuals = new TreeSet<>();
 		for (int i = 0; i < topIndividualN; i++) {
@@ -104,18 +118,20 @@ public class GeneticMain {
 				bestIndividualYet = topIndividuals.last();
 				System.out.println("\tNew best individual for " + rzCorpusSize + ": " + bestIndividualYet.getFitness());
 				Map<String,Double> map = bestIndividualYet.getValues();
-//		System.out.println("\t\tfrontness: " + map.get("frontness"));
-				System.out.println("\t\tfrontness: 100");
+
+				System.out.println("\t\tfrontness: " + map.get("frontness"));
 				System.out.println("\t\theight: " + map.get("height") + "\n");
-//		System.out.println("\t\tplace of articulation: " + map.get("place_of_articulation"));
-				System.out.println("\t\tplace of articulation: 100");
-				System.out.println("\t\tmanner of articulation: " + map.get("manner_of_articulation"));
-				System.out.println("\t\tvoicing: " + map.get("voicing") + "\n");
-				System.out.println("\t\tonset: " + map.get("onset"));
-//		System.out.println("\t\tnucleus: " + map.get("nucleus"));
-				System.out.println("\t\tnucleus: 100");
-				System.out.println("\t\tcoda: " + map.get("coda") + "\n");
+				System.out.println("\t\troundness: " + map.get("roundness") + "\n");
+				System.out.println("\t\ttension: " + map.get("tension") + "\n");
 				System.out.println("\t\tstress: " + map.get("stress") + "\n");
+
+				System.out.println("\t\tmanner: " + map.get("manner"));
+				System.out.println("\t\tplace: " + map.get("place"));
+				System.out.println("\t\tvoicing: " + map.get("voicing") + "\n");
+
+				System.out.println("\t\tonset: " + map.get("onset"));
+				System.out.println("\t\tnucleus: " + map.get("nucleus"));
+				System.out.println("\t\tcoda: " + map.get("coda") + "\n");
 			}
 
 			System.out.println("\tTemp: " + temp);
@@ -124,23 +140,26 @@ public class GeneticMain {
 			System.out.println("\tBest fitness of all: " + bestFitnessYet);
 
 			//cool mutation rate
-			if (temp > 1)
+			if (temp > 1.0)
 				temp -= coolingRate;
 		}
 		System.out.println("\tBest individual of final generation: " + topIndividuals.last().getFitness());
 		Map<String,Double> map = topIndividuals.last().getValues();
-//		System.out.println("\t\tfrontness: " + map.get("frontness"));
-		System.out.println("\t\tfrontness: 100");
+
+		System.out.println("\t\tfrontness: " + map.get("frontness"));
 		System.out.println("\t\theight: " + map.get("height") + "\n");
-//		System.out.println("\t\tplace of articulation: " + map.get("place_of_articulation"));
-		System.out.println("\t\tplace of articulation: 100");
-		System.out.println("\t\tmanner of articulation: " + map.get("manner_of_articulation"));
-		System.out.println("\t\tvoicing: " + map.get("voicing") + "\n");
-		System.out.println("\t\tonset: " + map.get("onset"));
-//		System.out.println("\t\tnucleus: " + map.get("nucleus"));
-		System.out.println("\t\tnucleus: 100");
-		System.out.println("\t\tcoda: " + map.get("coda") + "\n");
+		System.out.println("\t\troundness: " + map.get("roundness") + "\n");
+		System.out.println("\t\ttension: " + map.get("tension") + "\n");
 		System.out.println("\t\tstress: " + map.get("stress") + "\n");
+
+		System.out.println("\t\tmanner: " + map.get("manner"));
+		System.out.println("\t\tplace: " + map.get("place"));
+		System.out.println("\t\tvoicing: " + map.get("voicing") + "\n");
+
+		System.out.println("\t\tonset: " + map.get("onset"));
+		System.out.println("\t\tnucleus: " + map.get("nucleus"));
+		System.out.println("\t\tcoda: " + map.get("coda") + "\n");
+
 		long endTime = System.nanoTime();
 		long totalTime = endTime - startTime;
 		if (totalTime / 1000000000 > 59) {

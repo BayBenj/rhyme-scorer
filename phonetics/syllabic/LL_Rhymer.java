@@ -2,6 +2,7 @@ package phonetics.syllabic;
 
 import ben_alignment.Alignment;
 import ben_alignment.ConsonantAligner;
+import genetic.Individual;
 import phonetics.*;
 import tables.MultiTables;
 
@@ -17,49 +18,54 @@ public class LL_Rhymer {
 	private final double tensionWeight;
 	private final double stressWeight;
 
-	private final double placeWeight;
 	private final double mannerWeight;
+	private final double placeWeight;
 	private final double voicingWeight;
 
 	private final double onsetWeight;
 	private final double nucleusWeight;
 	private final double codaWeight;
 
-	public LL_Rhymer(MultiTables ll_tables, double frontnessWeight, double heightWeight, double roundnessWeight, double tensionWeight, double stressWeight, double placeWeight, double mannerWeight, double voicingWeight, double onsetWeight, double nucleusWeight, double codaWeight) {
+	public LL_Rhymer(MultiTables ll_tables, double frontnessWeight, double heightWeight, double roundnessWeight, double tensionWeight, double stressWeight, double mannerWeight, double placeWeight, double voicingWeight, double onsetWeight, double nucleusWeight, double codaWeight) {
 		this.ll_tables = ll_tables;
+
 		this.frontnessWeight = frontnessWeight;
 		this.heightWeight = heightWeight;
 		this.roundnessWeight = roundnessWeight;
 		this.tensionWeight = tensionWeight;
 		this.stressWeight = stressWeight;
-		this.placeWeight = placeWeight;
+
 		this.mannerWeight = mannerWeight;
+		this.placeWeight = placeWeight;
 		this.voicingWeight = voicingWeight;
+
 		this.onsetWeight = onsetWeight;
 		this.nucleusWeight = nucleusWeight;
 		this.codaWeight = codaWeight;
 	}
 
-//	public LL_Rhymer(Individual weights) {
-//		Map<String,Double> map = weights.getValues();
-//		this.ll_tables = weights.ll_tables;
-//		this.frontnessWeight = map.get("frontness");
-//		this.heightWeight = map.get("height");
-//		this.roundnessWeight = map.get("roundness");
-//		this.tensionWeight = map.get("tension");
-//		this.stressWeight = map.get("stress");
-//		this.placeWeight = map.get("place_of_articulation");
-//		this.mannerWeight = map.get("manner_of_articulation");
-//		this.voicingWeight = map.get("voicing");
-//		this.onsetWeight = map.get("onset");
-//		this.nucleusWeight = map.get("nucleus");
-//		this.codaWeight = map.get("coda");
-//	}
+	public LL_Rhymer(MultiTables ll_tables, Individual indiv) {
+		this.ll_tables = ll_tables;
+
+		this.frontnessWeight = indiv.getValues().get("frontness");
+		this.heightWeight = indiv.getValues().get("height");
+		this.roundnessWeight = indiv.getValues().get("roundness");
+		this.tensionWeight = indiv.getValues().get("tension");
+		this.stressWeight = indiv.getValues().get("stress");
+
+		this.mannerWeight = indiv.getValues().get("manner");
+		this.placeWeight = indiv.getValues().get("place");
+		this.voicingWeight = indiv.getValues().get("voicing");
+
+		this.onsetWeight = indiv.getValues().get("onset");
+		this.nucleusWeight = indiv.getValues().get("nucleus");
+		this.codaWeight = indiv.getValues().get("coda");
+	}
 
 	public static void test(MultiTables tables) {
 		System.out.println("\n\nTest 1");
-		String s1 = "black";
-		String s2 = "white";
+		String s1 = "asher";
+		String s2 = "stephen";
 		List<WordSyllables> w1 = (Phoneticizer.getSyllables(s1));
 		List<WordSyllables> w2 = (Phoneticizer.getSyllables(s2));
 		LL_Rhymer temp = new LL_Rhymer(tables,1,1,1,1,1,1,1,1,1,1,1);
@@ -82,13 +88,13 @@ public class LL_Rhymer {
 //		score = temp.score2Words(w1.get(0),w2.get(0));
 //		System.out.println("\nScore for f(" + s1 + ", " + s2 + ") = " + score);
 
-		System.out.println("\n\nTest 2");
-		s1 = "strengths";
-		s2 = "pranks";
-		w1 = (Phoneticizer.getSyllables(s1));
-		w2 = (Phoneticizer.getSyllables(s2));
-		score = temp.score2Words(w1.get(0),w2.get(0));
-		System.out.println("\nScore for f(" + s1 + ", " + s2 + ") = " + score);
+//		System.out.println("\n\nTest 2");
+//		s1 = "strengths";
+//		s2 = "pranks";
+//		w1 = (Phoneticizer.getSyllables(s1));
+//		w2 = (Phoneticizer.getSyllables(s2));
+//		score = temp.score2Words(w1.get(0),w2.get(0));
+//		System.out.println("\nScore for f(" + s1 + ", " + s2 + ") = " + score);
 
 	}
 
@@ -144,9 +150,9 @@ public class LL_Rhymer {
 		double codaWeight2 = codaWeight;
 
 		//nuclei
-		VowelPhoneme n1 = syl1.getNucleus();
-		VowelPhoneme n2 = syl2.getNucleus();
-		double nucleus = score2Vowels(n1, n2) * nucleusWeight;
+		final VowelPhoneme n1 = syl1.getNucleus();
+		final VowelPhoneme n2 = syl2.getNucleus();
+		final double nucleus = score2Vowels(n1, n2) * nucleusWeight;
 
 		//onsets
 		List<ConsonantPhoneme> o1 = syl1.getOnset();
@@ -165,8 +171,8 @@ public class LL_Rhymer {
 		}
 
 		//codas
-		List<ConsonantPhoneme> c1 = syl1.getCoda();
-		List<ConsonantPhoneme> c2 = syl2.getCoda();
+		final List<ConsonantPhoneme> c1 = syl1.getCoda();
+		final List<ConsonantPhoneme> c2 = syl2.getCoda();
 		double coda;
 		if ((c1 == null && c2 == null) || (c1.isEmpty() && c2.isEmpty())) {
 			coda = 0;
@@ -176,7 +182,7 @@ public class LL_Rhymer {
 			coda = 1.0;
 		}
 		else {
-			Alignment coda_align = ConsonantAligner.align2ConsonantSequences(c1, c2, ll_tables.consonantTables, mannerWeight, placeWeight, voicingWeight);
+			final Alignment coda_align = ConsonantAligner.align2ConsonantSequences(c1, c2, ll_tables.consonantTables, mannerWeight, placeWeight, voicingWeight);
 			coda = coda_align.normalizedScore * codaWeight;
 		}
 
@@ -213,43 +219,5 @@ public class LL_Rhymer {
 		final double result = scoreSum / weightSum;
 		return result;
 	}
-
-//	private double score2Consonants(ConsonantPhoneme ph1, ConsonantPhoneme ph2) {
-////		if (ph1 == null && ph2 == null) return 1.0;
-////		if (ph1 == null || ph2 == null) return 0;
-////		if (ph1 == ph2) return 1.0;
-//		int m1 = ll_tables.consonantTables.mannerTable.getCoord(ph1.phonemeEnum.getManner());
-//		int p1 = ll_tables.consonantTables.placeTable.getCoord(ph1.phonemeEnum.getPlace());
-//		int v1 = ll_tables.consonantTables.voicingTable.getCoord(ph1.phonemeEnum.isVoiced());
-//
-//		int m2 = ll_tables.consonantTables.mannerTable.getCoord(ph2.phonemeEnum.getManner());
-//		int p2 = ll_tables.consonantTables.placeTable.getCoord(ph2.phonemeEnum.getPlace());
-//		int v2 = ll_tables.consonantTables.voicingTable.getCoord(ph2.phonemeEnum.isVoiced());
-//
-//		double result =
-//				(ll_tables.consonantTables.mannerTable.cell(m1,m2) * mannerWeight) +
-//				(ll_tables.consonantTables.placeTable.cell(p1,p2) * placeWeight) +
-//				(ll_tables.consonantTables.voicingTable.cell(v1,v2) * voicingWeight);
-//		return result;
-//	}
-//
-//	private double score2Consonants(Gap g, ConsonantPhoneme ph) {
-////		if (ph1 == null && ph2 == null) return 1.0;
-////		if (ph1 == null || ph2 == null) return 0;
-////		if (ph1 == ph2) return 1.0;
-//		int m1 = ll_tables.consonantTables.mannerTable.getCoord(ph.phonemeEnum.getManner());
-//		int p1 = ll_tables.consonantTables.placeTable.getCoord(ph.phonemeEnum.getPlace());
-//		int v1 = ll_tables.consonantTables.voicingTable.getCoord(ph.phonemeEnum.isVoiced());
-//
-//		int m2 = ll_tables.consonantTables.mannerTable.getGapCoord(g);
-//		int p2 = ll_tables.consonantTables.placeTable.getGapCoord(g);
-//		int v2 = ll_tables.consonantTables.voicingTable.getGapCoord(g);
-//
-//		double result =
-//				(ll_tables.consonantTables.mannerTable.cell(m1,m2) * mannerWeight) +
-//				(ll_tables.consonantTables.placeTable.cell(p1,p2) * placeWeight) +
-//				(ll_tables.consonantTables.voicingTable.cell(v1,v2) * voicingWeight);
-//		return result;
-//	}
 
 }

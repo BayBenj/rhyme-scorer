@@ -3,8 +3,9 @@ package genetic;
 import data.DataContainer;
 import data.Dataset;
 import phonetics.Phoneticizer;
-import phonetics.syllabic.Rhymer;
+import phonetics.syllabic.LL_Rhymer;
 import phonetics.syllabic.WordSyllables;
+import tables.MultiTables;
 
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Set;
 public class Individual implements Comparable<Individual> {
 
 	private static int count = 0;
+	public static MultiTables tables;
 
 	private Map<String,Double> values;
 	private double fitness = -1;
@@ -129,9 +131,17 @@ public class Individual implements Comparable<Individual> {
 			}
 			Map.Entry<String,WordSyllables> testDictWord = sampleIterator.next();
 
-			Set<String> positives = GeneticMain.data.get(testDictWord.getKey());//get all words datamuse says rhyme with it removing ones outside of valid cmu dictionary
+			Set<String> positives = GeneticMain.data.get(testDictWord.getKey());//get all words datamuse says rhyme with it removing ones outside of valid cmu dictionary TODO fix???
+			while (positives == null) {
+				if (!sampleIterator.hasNext()) {
+					sampleIterator = DataContainer.dictionary.entrySet().iterator();
+				}
+				testDictWord = sampleIterator.next();
 
-			Rhymer temp = new Rhymer(this);
+				positives = GeneticMain.data.get(testDictWord.getKey());
+			}
+
+			LL_Rhymer temp = new LL_Rhymer(tables, this);
 			int tempTruePositives = 0;
 			int tempTrueNegatives = 0;
 			int tempFalsePositives = 0;

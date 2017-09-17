@@ -19,21 +19,22 @@ import tables.*;
 public abstract class Main {
 
 	public static String rootPath;
+	public static MultiTables finalTables;
 
 	public static void main(String[] args) throws IOException {
 		setupRootPath();
 		DataContainer.setupDict();
 
-		DataContainer.rhymeZoneNearRhymes = DataLoader.deserializeRhymes("RZ-adv", DataContainer.size);
-		DataContainer.rhymeZoneNearRhymes.clean();
+		DataContainer.rhymeZoneAdvanced = DataLoader.deserializeRhymes("RZ-adv", DataContainer.size);
+		DataContainer.rhymeZoneAdvanced.clean();
 
-		DataContainer.setupRzDict(DataContainer.rhymeZoneNearRhymes);
+		DataContainer.setupRzDict(DataContainer.rhymeZoneAdvanced);
 		Dataset randomRzMatches = getRandomRzMatches();
 
 		//monophonemic
 		System.out.println("\n\nMONOPHONEMIC (consonants and vowels)");
 		MonoTables randoms = findMonoCountsOnly(randomRzMatches);
-		MonoTables rhymes = findMonoCountsOnly(DataContainer.rhymeZoneNearRhymes);
+		MonoTables rhymes = findMonoCountsOnly(DataContainer.rhymeZoneAdvanced);
 		randoms.foldAll();
 		rhymes.foldAll();
 
@@ -56,7 +57,7 @@ public abstract class Main {
 		//multiphonemic
 		System.out.println("\n\nMULTIPHONEMIC (consonants only)");
 		MultiTables randoms2 = findAllCounts(randomRzMatches, mono_ll_consonant_tables);
-		MultiTables rhymes2 = findAllCounts(DataContainer.rhymeZoneNearRhymes, mono_ll_consonant_tables);
+		MultiTables rhymes2 = findAllCounts(DataContainer.rhymeZoneAdvanced, mono_ll_consonant_tables);
 		randoms2.foldAll();
 		rhymes2.foldAll();
 
@@ -67,9 +68,9 @@ public abstract class Main {
 		MultiConsonantTables multi_ll_tables = MultiConsonantTables.getLogLikelihoodTables(randoms2.consonantTables, rhymes2.consonantTables);
 		multi_ll_tables.LL_table_printLL();
 
-		MultiTables finalTables = new MultiTables(multi_ll_tables, mono_ll_vowel_tables);
+		finalTables = new MultiTables(multi_ll_tables, mono_ll_vowel_tables);
 
-		LL_Rhymer.test(finalTables);
+		//LL_Rhymer.test(finalTables);
 	}
 
 	public static Dataset getRandomRzMatches() {
