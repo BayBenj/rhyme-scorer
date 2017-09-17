@@ -25,7 +25,7 @@ public abstract class DataLoader {
 				rhymes.add(tempWord);
 			}
 			result.put(word,rhymes);
-			if (i % 50000 == 0 && i != 0) {
+			if ((i % 100000 == 0 && i != 0) || i == 10000) {
 				serializeRhymes(name, result, i);
 				System.out.println("SERIALIZED FIRST " + i + " " + name + " RHYMES");
 			}

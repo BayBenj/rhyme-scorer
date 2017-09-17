@@ -58,8 +58,8 @@ public class LL_Rhymer {
 
 	public static void test(MultiTables tables) {
 		System.out.println("\n\nTest 1");
-		String s1 = "hold";
-		String s2 = "molds";
+		String s1 = "black";
+		String s2 = "white";
 		List<WordSyllables> w1 = (Phoneticizer.getSyllables(s1));
 		List<WordSyllables> w2 = (Phoneticizer.getSyllables(s2));
 		LL_Rhymer temp = new LL_Rhymer(tables,1,1,1,1,1,1,1,1,1,1,1);
@@ -82,9 +82,9 @@ public class LL_Rhymer {
 //		score = temp.score2Words(w1.get(0),w2.get(0));
 //		System.out.println("\nScore for f(" + s1 + ", " + s2 + ") = " + score);
 
-		System.out.println("\n\nTest 4");
-		s1 = "eating";
-		s2 = "readings";
+		System.out.println("\n\nTest 2");
+		s1 = "strengths";
+		s2 = "pranks";
 		w1 = (Phoneticizer.getSyllables(s1));
 		w2 = (Phoneticizer.getSyllables(s2));
 		score = temp.score2Words(w1.get(0),w2.get(0));

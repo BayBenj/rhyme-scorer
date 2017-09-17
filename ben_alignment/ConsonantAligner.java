@@ -77,6 +77,7 @@ public abstract class ConsonantAligner {
 		}
 		printAlignmentTable(c1,c2,alignmentTable);
 		printAlignmentTable(c1,c2,backPointers);
+		System.out.print("\n");
 		return backtrack(backPointers, c1, c2, alignmentTable, ll_tables, m_w, p_w, v_w);
 	}
 

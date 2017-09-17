@@ -15,13 +15,17 @@ public abstract class DataContainer {
 	private final static String rhymeZonePerf = datamuseBase + "rel_rhy=";
 	private final static String rhymeZoneNear = datamuseBase + "rel_nry=";
 	private final static String rhymeZoneSounds = datamuseBase + "sl=";
-	public final static int size = 100000;
+	private final static String rhymeZoneAdv = datamuseBase + "arhy=1&md=f&sl=";
+	public final static int size = 10000;
 
 	public static Dataset rhymeZonePerfRhymes = new Dataset();
 	public static Dataset rhymeZoneNearRhymes = new Dataset();
 	public static Dataset rhymeZoneSoundsLike = new Dataset();
+	public static Dataset rhymeZoneAdvanced = new Dataset();
 	public static Dataset hirjeeRapRhymes = new Dataset();
+
 	public static Map<String,WordSyllables> dictionary = new HashMap<>();
+	public static Set<String> RZdictionary = new HashSet<>();
 
 	public static void main(String[] args) throws IOException, JSONException {
 		Main.setupRootPath();
@@ -35,19 +39,30 @@ public abstract class DataContainer {
 	private static void serializeDatasets() throws IOException {
 //		rhymeZonePerfRhymes = DataLoader.loadDataset("RZ-perfect", rhymeZonePerf, size);
 //		rhymeZoneNearRhymes = DataLoader.loadDataset("RZ-near", rhymeZoneNear, size);
-		rhymeZoneSoundsLike = DataLoader.loadDataset("RZ-sounds", rhymeZoneSounds, size);
+//		rhymeZoneSoundsLike = DataLoader.loadDataset("RZ-sounds", rhymeZoneSounds, size);
+		rhymeZoneAdvanced = DataLoader.loadDataset("RZ-adv", rhymeZoneAdv, size);
 	}
 
 	private static void deserializeDatasets() {
 		rhymeZonePerfRhymes = DataLoader.deserializeRhymes("RZ-perfect", size);
 		rhymeZoneNearRhymes = DataLoader.deserializeRhymes("RZ-near", size);
 		rhymeZoneSoundsLike = DataLoader.deserializeRhymes("RZ-sounds", size);
+		rhymeZoneAdvanced = DataLoader.deserializeRhymes("RZ-adv", size);
 	}
 
 	public static void cleanDatasets() {
 		rhymeZonePerfRhymes.clean();
 		rhymeZoneNearRhymes.clean();
 		rhymeZoneSoundsLike.clean();
+		rhymeZoneAdvanced.clean();
+	}
+
+	public static void setupRzDict(Dataset dataset) {
+		RZdictionary = new HashSet<>();
+		for (Map.Entry<String,Set<String>> entry : dataset.entrySet()) {
+			RZdictionary.add(entry.getKey());
+			RZdictionary.addAll(entry.getValue());
+		}
 	}
 
 	public static void setupDict() {

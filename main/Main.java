@@ -24,14 +24,15 @@ public abstract class Main {
 		setupRootPath();
 		DataContainer.setupDict();
 
-		Dataset randomCmuMatches = getRandomMatches();
-
-		DataContainer.rhymeZoneNearRhymes = DataLoader.deserializeRhymes("RZ-near", DataContainer.size);
+		DataContainer.rhymeZoneNearRhymes = DataLoader.deserializeRhymes("RZ-adv", DataContainer.size);
 		DataContainer.rhymeZoneNearRhymes.clean();
+
+		DataContainer.setupRzDict(DataContainer.rhymeZoneNearRhymes);
+		Dataset randomRzMatches = getRandomRzMatches();
 
 		//monophonemic
 		System.out.println("\n\nMONOPHONEMIC (consonants and vowels)");
-		MonoTables randoms = findMonoCountsOnly(randomCmuMatches);
+		MonoTables randoms = findMonoCountsOnly(randomRzMatches);
 		MonoTables rhymes = findMonoCountsOnly(DataContainer.rhymeZoneNearRhymes);
 		randoms.foldAll();
 		rhymes.foldAll();
@@ -54,7 +55,7 @@ public abstract class Main {
 
 		//multiphonemic
 		System.out.println("\n\nMULTIPHONEMIC (consonants only)");
-		MultiTables randoms2 = findAllCounts(randomCmuMatches, mono_ll_consonant_tables);
+		MultiTables randoms2 = findAllCounts(randomRzMatches, mono_ll_consonant_tables);
 		MultiTables rhymes2 = findAllCounts(DataContainer.rhymeZoneNearRhymes, mono_ll_consonant_tables);
 		randoms2.foldAll();
 		rhymes2.foldAll();
@@ -71,20 +72,20 @@ public abstract class Main {
 		LL_Rhymer.test(finalTables);
 	}
 
-	public static Dataset getRandomMatches() {
+	public static Dataset getRandomRzMatches() {
 		Dataset result = new Dataset();
-		Iterator<String> iterator = DataContainer.dictionary.keySet().iterator();
-		for (String s1 : DataContainer.dictionary.keySet()) {
+		Iterator<String> iterator = DataContainer.RZdictionary.iterator();
+		for (String s1 : DataContainer.RZdictionary) {
 			String s2;
-			for (int i = 0; i < 100; i++) {
+			for (int i = 0; i < 300; i++) {
 				Set<String> set = new HashSet<>();
 				if (!iterator.hasNext()) {
-					iterator = DataContainer.dictionary.keySet().iterator();
+					iterator = DataContainer.RZdictionary.iterator();
 				}
 				s2 = iterator.next();
 				while (s1.equals(s2) || s2 == null || s2.isEmpty() || s2 == "") {
 					if (!iterator.hasNext()) {
-						iterator = DataContainer.dictionary.keySet().iterator();
+						iterator = DataContainer.RZdictionary.iterator();
 					}
 					s2 = iterator.next();
 				}
