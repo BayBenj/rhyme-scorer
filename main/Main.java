@@ -70,7 +70,7 @@ public abstract class Main {
 
 		finalTables = new MultiTables(multi_ll_tables, mono_ll_vowel_tables);
 
-		//LL_Rhymer.test(finalTables);
+		LL_Rhymer.test(finalTables);
 	}
 
 	public static Dataset getRandomRzMatches() {

@@ -1,7 +1,6 @@
 package genetic;
 
 import data.DataContainer;
-import data.Dataset;
 import phonetics.Phoneticizer;
 import phonetics.syllabic.LL_Rhymer;
 import phonetics.syllabic.WordSyllables;
@@ -35,8 +34,8 @@ public class Individual implements Comparable<Individual> {
 
 	public void mutate() {
 		if (!mutated) {
-			int rnd = GeneticMain.r.nextInt(5);
-			if (rnd == 0) {
+//			int rnd = GeneticMain.r.nextInt(5);
+//			if (rnd == 0) {
 				int chosenIndex = GeneticMain.r.nextInt(this.getValues().entrySet().size());
 				int i = 0;
 				for (Map.Entry<String,Double> entry : this.getValues().entrySet()) {
@@ -49,7 +48,7 @@ public class Individual implements Comparable<Individual> {
 					}
 					i++;
 				}
-			}
+//			}
 			mutated = true;
 		}
 	}

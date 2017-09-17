@@ -3,6 +3,7 @@ package genetic;
 import data.DataContainer;
 import data.Dataset;
 import main.Main;
+import phonetics.syllabic.LL_Rhymer;
 import tables.MultiTables;
 
 import java.io.IOException;
@@ -16,8 +17,8 @@ public class GeneticMain {
 	private final static int maxGenerations = 10000;
 	public final static double fitnessThreshold = 0.5;
 	private final static int rzCorpusSize = 10000;
-	public static double temp = 1.00;
-	private final static double coolingRate = 0.001;
+	public static double temp = 10.00;
+	private final static double coolingRate = 0.01;
 	public static Dataset data;
 
 	public static void main(String[] args) {
@@ -35,49 +36,7 @@ public class GeneticMain {
 
 		data = DataContainer.rhymeZoneAdvanced;
 
-		Map<String, Double> values = new HashMap<>();
-
-//		New best individual for 100: 0.9106901217861975
-//
-// 		frontness: 125.85064944028905
-//		height: 66.31743773925848
-//
-//		place_of_articulation: 108.18860203149124
-//		manner_of_articulation: 98.01522428944162
-//		voicing: 15.508342021886682
-//
-//		onset: 20.284123584145814
-//		nucleus: 60.65245740265866
-//		coda: 127.75846797910884
-//
-//		stress: 0.6026471314006965
-
-//		//values.put("frontness", 125.0);//always 100
-//		values.put("height", 00.0);
-//
-//		//values.put("place_of_articulation", 110.0);//always 100
-//		values.put("manner_of_articulation", 000.0);
-//		values.put("voicing", 00.0);
-//
-//		values.put("onset", 00.0);
-//		//values.put("nucleus", 60.0);//always 100
-//		values.put("coda", 000.0);
-//
-//		values.put("stress", 00.0);
-
-		values.put("frontness", 100.0);
-		values.put("height", 100.0);
-		values.put("roundness", 100.0);
-		values.put("tension", 100.0);
-		values.put("stress", 100.0);
-
-		values.put("manner", 100.0);
-		values.put("place", 100.0);
-		values.put("voicing", 100.0);
-
-		values.put("onset", 100.0);
-		values.put("nucleus", 100.0);
-		values.put("coda", 100.0);
+		Map<String, Double> values = LL_Rhymer.getGaOptimizedWeights();
 
 		TreeSet<Individual> topIndividuals = new TreeSet<>();
 		for (int i = 0; i < topIndividualN; i++) {
@@ -120,9 +79,9 @@ public class GeneticMain {
 				Map<String,Double> map = bestIndividualYet.getValues();
 
 				System.out.println("\t\tfrontness: " + map.get("frontness"));
-				System.out.println("\t\theight: " + map.get("height") + "\n");
-				System.out.println("\t\troundness: " + map.get("roundness") + "\n");
-				System.out.println("\t\ttension: " + map.get("tension") + "\n");
+				System.out.println("\t\theight: " + map.get("height"));
+				System.out.println("\t\troundness: " + map.get("roundness"));
+				System.out.println("\t\ttension: " + map.get("tension"));
 				System.out.println("\t\tstress: " + map.get("stress") + "\n");
 
 				System.out.println("\t\tmanner: " + map.get("manner"));
