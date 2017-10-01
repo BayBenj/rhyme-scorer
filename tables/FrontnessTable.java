@@ -2,7 +2,9 @@ package tables;
 
 import phonetics.Frontness;
 
-public class FrontnessTable extends ProbabilityTable {
+import java.io.Serializable;
+
+public class FrontnessTable extends ProbabilityTable implements Serializable {
 
 	public FrontnessTable() {
 		super();

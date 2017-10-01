@@ -2,7 +2,9 @@ package tables;
 
 import phonetics.Tension;
 
-public class TensionTable extends ProbabilityTable {
+import java.io.Serializable;
+
+public class TensionTable extends ProbabilityTable implements Serializable {
 
 	public TensionTable() {
 		super();

@@ -1,8 +1,9 @@
 package tables;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class ProbabilityTable extends ArrayList<ArrayList<Double>> {
+public abstract class ProbabilityTable extends ArrayList<ArrayList<Double>> implements Serializable {
 
 	public ProbabilityTable() {
 		super();

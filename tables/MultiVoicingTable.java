@@ -1,6 +1,8 @@
 package tables;
 
-public class MultiVoicingTable extends VoicingTable {
+import java.io.Serializable;
+
+public class MultiVoicingTable extends VoicingTable implements Serializable {
 
 	@Override
 	public int get_i_size() {

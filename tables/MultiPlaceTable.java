@@ -1,6 +1,8 @@
 package tables;
 
-public class MultiPlaceTable extends PlaceTable {
+import java.io.Serializable;
+
+public class MultiPlaceTable extends PlaceTable implements Serializable {
 
 	@Override
 	public int get_i_size() {

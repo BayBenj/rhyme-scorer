@@ -1,13 +1,16 @@
 package main;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 import data.DataContainer;
 import data.DataLoader;
 import data.Dataset;
+import data.HttpInterface;
+import org.json.JSONException;
+import org.json.JSONObject;
 import phonetics.ConsonantPhoneme;
+import phonetics.Phoneticizer;
 import phonetics.VowelPhoneme;
 import phonetics.syllabic.LL_Rhymer;
 import phonetics.syllabic.Syllable;
@@ -70,7 +73,45 @@ public abstract class Main {
 
 		finalTables = new MultiTables(multi_ll_tables, mono_ll_vowel_tables);
 
+		serializeTables(finalTables);
+
 		LL_Rhymer.test(finalTables);
+	}
+
+	public static void serializeTables(MultiTables tables) {
+		System.out.print("Serializing tables...");
+		try {
+			FileOutputStream fileOut = new FileOutputStream(Main.rootPath + "data/tables/ll_tables.ser");
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(tables);
+			out.close();
+			fileOut.close();
+			System.out.println("Serialized tables saved in data/tables/ll_tables.ser");
+		}
+		catch(IOException i) {
+			i.printStackTrace();
+		}
+	}
+
+	public static MultiTables deserializeTables() {
+		System.out.print("Deserializing tables...");
+		MultiTables result = null;
+		try {
+			FileInputStream fileIn = new FileInputStream(Main.rootPath + "data/tables/ll_tables.ser");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			result = (MultiTables) in.readObject();
+			in.close();
+			fileIn.close();
+			System.out.println("done!");
+		}
+		catch(IOException i) {
+			i.printStackTrace();
+		}
+		catch(ClassNotFoundException c) {
+			System.out.println("class not found");
+			c.printStackTrace();
+		}
+		return result;
 	}
 
 	public static Dataset getRandomRzMatches() {

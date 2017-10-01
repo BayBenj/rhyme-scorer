@@ -1,6 +1,8 @@
 package tables;
 
-public class StressTable extends ProbabilityTable {
+import java.io.Serializable;
+
+public class StressTable extends ProbabilityTable implements Serializable {
 
 	public StressTable() {
 		super();

@@ -1,6 +1,8 @@
 package tables;
 
-public class MultiTables {
+import java.io.Serializable;
+
+public class MultiTables implements Serializable {
 
 	public MultiConsonantTables consonantTables;
 	public VowelTables vowelTables;

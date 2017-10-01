@@ -2,13 +2,13 @@ package phonetics.syllabic;
 
 import ben_alignment.Alignment;
 import ben_alignment.ConsonantAligner;
+import data.DataContainer;
 import genetic.Individual;
+import main.Main;
 import phonetics.*;
 import tables.MultiTables;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LL_Rhymer {
 
@@ -27,6 +27,19 @@ public class LL_Rhymer {
 	private final double onsetWeight;
 	private final double nucleusWeight;
 	private final double codaWeight;
+
+	public static void main(String[] args) {
+		Main.setupRootPath();
+		DataContainer.setupDict();
+		MultiTables tables = Main.deserializeTables();
+		//test(tables);
+		String word = "station";
+		Set<String> rhymes = rhymesByThresholds(1.0, 1.0, tables, word);
+		System.out.println("RHYMES W/ " + word);
+		for (String s : rhymes) {
+			System.out.println("\t" + s);
+		}
+	}
 
 	public LL_Rhymer(MultiTables ll_tables, double frontnessWeight, double heightWeight, double roundnessWeight, double tensionWeight, double stressWeight, double mannerWeight, double placeWeight, double voicingWeight, double onsetWeight, double nucleusWeight, double codaWeight) {
 		this.ll_tables = ll_tables;
@@ -84,6 +97,19 @@ public class LL_Rhymer {
 		System.out.println("experimental score for f(" + s1 + ", " + s2 + ") = " + experimental_score);
 	}
 
+	public static Set<String> rhymesByThresholds(double min, double max, MultiTables tables, String s) {
+		Set<String> result = new HashSet<>();
+		WordSyllables w = (Phoneticizer.getSyllables(s)).get(0);
+		for (Map.Entry<String, WordSyllables> entry : DataContainer.dictionary.entrySet()) {
+			if (w.getRhymeTailFromStress().size() != entry.getValue().getRhymeTailFromStress().size()) continue;
+			double score = score2WordsByGaOptimizedWeights(tables, w, entry.getValue());
+			if (score >= min && score <= max) {
+				result.add(entry.getKey());
+			}
+		}
+		return result;
+	}
+
 	public static Map<String,Double> getGaOptimizedWeights() {
 		Map<String,Double> map = new HashMap<>();
 
@@ -114,14 +140,14 @@ public class LL_Rhymer {
 		map.put("height", 151.347951581586);
 		map.put("roundness", 65.45199233466151);
 		map.put("tension", 118.49472506265411);
-		map.put("stress", 150.0);
+		map.put("stress", 300.0);
 
 		map.put("manner", 80.80378174654354);
 		map.put("place", 53.05358882143532);
 		map.put("voicing", 25.0);
 
 		map.put("onset", 40.938284197428366);
-		map.put("nucleus", 200.0);
+		map.put("nucleus", 100.0);
 		map.put("coda", 87.89520831632227);
 
 		return map;

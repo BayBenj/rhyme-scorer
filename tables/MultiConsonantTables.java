@@ -1,8 +1,9 @@
 package tables;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MultiConsonantTables {
+public class MultiConsonantTables implements Serializable {
 
 	public MultiMannerTable mannerTable;
 	public MultiPlaceTable placeTable;

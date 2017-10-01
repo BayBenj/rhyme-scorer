@@ -2,7 +2,9 @@ package tables;
 
 import phonetics.Roundness;
 
-public class RoundnessTable extends ProbabilityTable {
+import java.io.Serializable;
+
+public class RoundnessTable extends ProbabilityTable implements Serializable {
 
 	public RoundnessTable() {
 		super();

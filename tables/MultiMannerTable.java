@@ -1,6 +1,8 @@
 package tables;
 
-public class MultiMannerTable extends MannerTable {
+import java.io.Serializable;
+
+public class MultiMannerTable extends MannerTable implements Serializable {
 
 	@Override
 	public int get_i_size() {

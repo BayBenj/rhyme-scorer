@@ -1,6 +1,8 @@
 package tables;
 
-public abstract class VoicingTable extends ProbabilityTable {
+import java.io.Serializable;
+
+public abstract class VoicingTable extends ProbabilityTable implements Serializable {
 
 	public int getSize() {
 		return 2;

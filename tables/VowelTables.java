@@ -1,8 +1,9 @@
 package tables;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class VowelTables {
+public class VowelTables implements Serializable {
 
 	public HeightTable heightTable;
 	public FrontnessTable frontnessTable;

@@ -2,7 +2,9 @@ package tables;
 
 import phonetics.Height;
 
-public class HeightTable extends ProbabilityTable {
+import java.io.Serializable;
+
+public class HeightTable extends ProbabilityTable implements Serializable {
 
 	public HeightTable() {
 		super();
