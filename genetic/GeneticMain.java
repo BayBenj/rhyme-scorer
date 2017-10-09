@@ -1,7 +1,8 @@
 package genetic;
 
 import data.DataContainer;
-import data.Dataset;
+import data.ScoreDataset;
+import data.SimpleDataset;
 import main.Main;
 import phonetics.syllabic.LL_Rhymer;
 import tables.MultiTables;
@@ -14,12 +15,13 @@ public class GeneticMain {
 	public final static Random r = new Random();
 	private final static int topIndividualN = 20;
 	private final static int offspringN = 100;
-	private final static int maxGenerations = 10000;
+	private final static int maxGenerations = 1000;
 	public final static double fitnessThreshold = 0.5;
 	private final static int rzCorpusSize = 10000;
-	public static double temp = 10.00;
-	private final static double coolingRate = 0.01;
-	public static Dataset data;
+	public static double temp = 100.00;
+	private final static double coolingRate = 0.1;
+	public static SimpleDataset data;
+	public static ScoreDataset score_data;
 
 	public static void main(String[] args) {
 		long startTime = System.nanoTime();
@@ -34,7 +36,8 @@ public class GeneticMain {
 		MultiTables tables = Main.finalTables;
 		Individual.tables = tables;
 
-		data = DataContainer.rhymeZoneAdvanced;
+//		data = DataContainer.rhymeZoneAdvanced;
+		score_data = DataContainer.rhymeZoneScoredAdvanced;
 
 		Map<String, Double> values = LL_Rhymer.getGaOptimizedWeights();
 
@@ -42,17 +45,19 @@ public class GeneticMain {
 		for (int i = 0; i < topIndividualN; i++) {
 			Individual temp = new Individual(values);
 			temp.mutate();
-			temp.calculateFitness();
+//			temp.calculateBinaryFitness();
+			temp.classifyByScore();
 			topIndividuals.add(temp);
 		}
 
-		double bestFitnessYet = -1;
-		double bestOfGeneration = -1;
+		double bestFitnessYet = 101;
+		double bestOfGeneration = 101;
 		double generationalTop10Average;
 		Individual bestIndividualYet;
 		int generation = 0;
 
-		while (bestOfGeneration < 1.0 && generation < maxGenerations) {
+//		while (bestOfGeneration > 0.0 && generation < maxGenerations) {
+		while (generation < maxGenerations) {
 			generation++;
 			System.out.println("Generation " + generation + "...");
 
@@ -69,13 +74,13 @@ public class GeneticMain {
 			generationalTop10Average = generationalAverage(topIndividuals);
 
 			//update highestFitness
-			bestOfGeneration = topIndividuals.last().getFitness();
+			bestOfGeneration = topIndividuals.first().getMean_sq_error();//last for binary F-score
 
 			//update absolutes
-			if (bestOfGeneration > bestFitnessYet) {
+			if (bestOfGeneration < bestFitnessYet) {
 				bestFitnessYet = bestOfGeneration;
-				bestIndividualYet = topIndividuals.last();
-				System.out.println("\tNew best individual for " + rzCorpusSize + ": " + bestIndividualYet.getFitness());
+				bestIndividualYet = topIndividuals.first();
+				System.out.println("\tNew best individual for " + rzCorpusSize + ": " + bestIndividualYet.getMean_sq_error());
 				Map<String,Double> map = bestIndividualYet.getValues();
 
 				System.out.println("\t\tfrontness: " + map.get("frontness"));
@@ -102,8 +107,8 @@ public class GeneticMain {
 			if (temp > 1.0)
 				temp -= coolingRate;
 		}
-		System.out.println("\tBest individual of final generation: " + topIndividuals.last().getFitness());
-		Map<String,Double> map = topIndividuals.last().getValues();
+		System.out.println("\tBest individual of final generation: " + topIndividuals.first().getMean_sq_error());
+		Map<String,Double> map = topIndividuals.first().getValues();
 
 		System.out.println("\t\tfrontness: " + map.get("frontness"));
 		System.out.println("\t\theight: " + map.get("height") + "\n");
@@ -158,7 +163,8 @@ public class GeneticMain {
 			}
 			Individual child = mater1.crossover(mater2);
 			child.mutate();
-			child.calculateFitness();
+//			child.calculateBinaryFitness();
+			child.classifyByScore();
 			result.add(child);
 		}
 		return result;
@@ -168,8 +174,9 @@ public class GeneticMain {
 		TreeSet<Individual> calculatedIndividuals = new TreeSet<>();
 		//sort by fitness, return the top topIndividualN
 		for (Individual ind : allIndividuals) {
-			if (ind.getFitness() == -1)
-				ind.calculateFitness();
+			if (ind.getMean_sq_error() == 101)
+//				ind.calculateBinaryFitness();
+				ind.classifyByScore();
 			calculatedIndividuals.add(ind);
 		}
 
@@ -177,8 +184,8 @@ public class GeneticMain {
 		try {
 			for (int i = 0; i < topIndividualN; i++) {
 				if (!calculatedIndividuals.isEmpty()) {
-					result.add(calculatedIndividuals.last());
-					calculatedIndividuals.remove(calculatedIndividuals.last());
+					result.add(calculatedIndividuals.first());
+					calculatedIndividuals.remove(calculatedIndividuals.first());
 				} else break;
 			}
 		} catch (NoSuchElementException e) {
@@ -190,7 +197,7 @@ public class GeneticMain {
 	public static double generationalAverage(Collection<Individual> inds) {
 		double total = 0;
 		for (Individual ind : inds) {
-			total += ind.getFitness();
+			total += ind.getMean_sq_error();
 		}
 		return total / inds.size();
 	}

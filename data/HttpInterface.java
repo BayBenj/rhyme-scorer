@@ -15,18 +15,24 @@ import java.util.List;
 public abstract class HttpInterface {
 
 	public static List<JSONObject> get(String query) throws IOException, JSONException {
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet(query);
-		HttpResponse response = client.execute(request);
-		BufferedReader rd = new BufferedReader (new InputStreamReader(response.getEntity().getContent()));
-		String line;
-		StringBuilder sb = new StringBuilder();
-		while ((line = rd.readLine()) != null) {
-			sb.append(line);
-			System.out.println(query);
-			System.out.println(line + "\n");
+		try {
+			HttpClient client = new DefaultHttpClient();
+			HttpGet request = new HttpGet(query);
+			HttpResponse response = client.execute(request);
+			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+			String line;
+			StringBuilder sb = new StringBuilder();
+			while ((line = rd.readLine()) != null) {
+				sb.append(line);
+				System.out.println(query);
+				System.out.println(line + "\n");
+			}
+			return DataLoader.parseJson(sb.toString());
 		}
-		return DataLoader.parseJson(sb.toString());
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }

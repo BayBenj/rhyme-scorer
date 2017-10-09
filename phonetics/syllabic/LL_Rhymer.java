@@ -7,7 +7,6 @@ import genetic.Individual;
 import main.Main;
 import phonetics.*;
 import tables.MultiTables;
-
 import java.util.*;
 
 public class LL_Rhymer {
@@ -32,8 +31,10 @@ public class LL_Rhymer {
 		Main.setupRootPath();
 		DataContainer.setupDict();
 		MultiTables tables = Main.deserializeTables();
+		tables.consonantTables.LL_table_printLL();
+		tables.vowelTables.LL_table_printLL();
 		//test(tables);
-		String word = "station";
+		String word = "berry";
 		Set<String> rhymes = rhymesByThresholds(1.0, 1.0, tables, word);
 		System.out.println("RHYMES W/ " + word);
 		for (String s : rhymes) {

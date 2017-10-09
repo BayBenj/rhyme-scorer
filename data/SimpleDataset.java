@@ -3,7 +3,7 @@ package data;
 import phonetics.syllabic.WordSyllables;
 import java.util.*;
 
-public class Dataset extends HashMap<String,Set<String>> {
+public class SimpleDataset extends HashMap<String,Set<String>> {
 
 	private Map<String,WordSyllables> dictionary = DataContainer.dictionary;
 
@@ -47,8 +47,3 @@ Rhyme zone perfect
 Rhyme zone near
 Rhyme zone sounds like?
  */
-
-
-
-
-

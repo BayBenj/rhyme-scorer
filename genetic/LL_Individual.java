@@ -91,11 +91,11 @@
 //		this.values = values;
 //	}
 //
-//	public double getFitness() {
+//	public double getF_score_fitness() {
 //		return fitness;
 //	}
 //
-//	public void setFitness(double fitness) {
+//	public void setF_score_fitness(double fitness) {
 //		this.fitness = fitness;
 //	}
 //
@@ -117,7 +117,7 @@
 //
 //		Individual that = (Individual) o;
 //
-//		if (Double.compare(that.getFitness(), getFitness()) != 0) return false;
+//		if (Double.compare(that.getF_score_fitness(), getF_score_fitness()) != 0) return false;
 //		if (id != that.id) return false;
 //		return getValues().equals(that.getValues());
 //	}
@@ -127,7 +127,7 @@
 //		int result;
 //		long temp;
 //		result = getValues().hashCode();
-//		temp = Double.doubleToLongBits(getFitness());
+//		temp = Double.doubleToLongBits(getF_score_fitness());
 //		result = 31 * result + (int) (temp ^ (temp >>> 32));
 //		result = 31 * result + id;
 //		return result;
@@ -136,7 +136,7 @@
 //	Iterator<Map.Entry<String,WordSyllables>> sampleIterator = DataContainer.dictionary.entrySet().iterator();
 //	Iterator<String> negIterator = DataContainer.dictionary.keySet().iterator();
 //
-//	public IndividualResults classify() {
+//	public IndividualResults classifyBinary() {
 //		//initialize return values
 //		int truePositives = 0;
 //		int trueNegatives = 0;
@@ -196,12 +196,12 @@
 //		return new IndividualResults(truePositives, trueNegatives, falsePositives, falseNegatives);
 //	}
 //
-//	public double calculateFitness() {
-//		IndividualResults results = this.classify();
+//	public double calculateBinaryFitness() {
+//		IndividualResults results = this.classifyBinary();
 //		double precision = calculatePrecision(results.truePositives, results.falsePositives);
 //		double recall = calculateRecall(results.truePositives, results.falseNegatives);
 //		double fScore = calculateFScore(precision, recall);
-//		this.setFitness(fScore);
+//		this.setF_score_fitness(fScore);
 //		return fScore;
 //	}
 //

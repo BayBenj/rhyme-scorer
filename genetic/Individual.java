@@ -5,6 +5,7 @@ import phonetics.Phoneticizer;
 import phonetics.syllabic.LL_Rhymer;
 import phonetics.syllabic.WordSyllables;
 import tables.MultiTables;
+import utils.Pair;
 
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +18,8 @@ public class Individual implements Comparable<Individual> {
 	public static MultiTables tables;
 
 	private Map<String,Double> values;
-	private double fitness = -1;
+	private double f_score_fitness = -1;
+	private double mean_sq_error = 101;
 	public int id = 0;
 	private boolean mutated = false;
 	private static final int sampleSize = 1000;
@@ -72,18 +74,26 @@ public class Individual implements Comparable<Individual> {
 		this.values = values;
 	}
 
-	public double getFitness() {
-		return fitness;
+	public double getF_score_fitness() {
+		return f_score_fitness;
 	}
 
-	public void setFitness(double fitness) {
-		this.fitness = fitness;
+	public void setF_score_fitness(double f_score_fitness) {
+		this.f_score_fitness = f_score_fitness;
+	}
+
+	public double getMean_sq_error() {
+		return mean_sq_error;
+	}
+
+	public void setMean_sq_error(double mean_sq_error) {
+		this.mean_sq_error = mean_sq_error;
 	}
 
 	@Override
 	public int compareTo(Individual o) {
-		if (this.fitness > o.fitness) return 1;
-		else if (this.fitness < o.fitness) return -1;
+		if (this.f_score_fitness > o.f_score_fitness) return 1;
+		else if (this.f_score_fitness < o.f_score_fitness) return -1;
 		else {
 			if (this.id < o.id) return 1;
 			else if (this.id > o.id) return -1;
@@ -98,7 +108,7 @@ public class Individual implements Comparable<Individual> {
 
 		Individual that = (Individual) o;
 
-		if (Double.compare(that.getFitness(), getFitness()) != 0) return false;
+		if (Double.compare(that.getF_score_fitness(), getF_score_fitness()) != 0) return false;
 		if (id != that.id) return false;
 		return getValues().equals(that.getValues());
 	}
@@ -108,7 +118,7 @@ public class Individual implements Comparable<Individual> {
 		int result;
 		long temp;
 		result = getValues().hashCode();
-		temp = Double.doubleToLongBits(getFitness());
+		temp = Double.doubleToLongBits(getF_score_fitness());
 		result = 31 * result + (int) (temp ^ (temp >>> 32));
 		result = 31 * result + id;
 		return result;
@@ -117,7 +127,7 @@ public class Individual implements Comparable<Individual> {
 	Iterator<Map.Entry<String,WordSyllables>> sampleIterator = DataContainer.dictionary.entrySet().iterator();
 	Iterator<String> negIterator = DataContainer.dictionary.keySet().iterator();
 
-	public IndividualResults classify() {
+	public IndividualBinaryResults classifyBinary() {
 		//initialize return values
 		int truePositives = 0;
 		int trueNegatives = 0;
@@ -182,15 +192,15 @@ public class Individual implements Comparable<Individual> {
 			falsePositives += tempFalsePositives;
 			falseNegatives += tempFalseNegatives;
 		}
-		return new IndividualResults(truePositives, trueNegatives, falsePositives, falseNegatives);
+		return new IndividualBinaryResults(truePositives, trueNegatives, falsePositives, falseNegatives);
 	}
 
-	public double calculateFitness() {
-		IndividualResults results = this.classify();
+	public double calculateBinaryFitness() {
+		IndividualBinaryResults results = this.classifyBinary();
 		double precision = calculatePrecision(results.truePositives, results.falsePositives);
 		double recall = calculateRecall(results.truePositives, results.falseNegatives);
 		double fScore = calculateFScore(precision, recall);
-		this.setFitness(fScore);
+		this.setF_score_fitness(fScore);
 		return fScore;
 	}
 
@@ -204,6 +214,50 @@ public class Individual implements Comparable<Individual> {
 
 	public static double calculateRecall(double truePositives, double falseNegatives) {
 		return truePositives / (truePositives + falseNegatives);
+	}
+
+	public double classifyByScore() {
+		double error_sum = 0;
+		int total_iterations = 0;
+		for (int sampleN = 0; sampleN < sampleSize; sampleN++) {
+			if (!sampleIterator.hasNext()) {
+				sampleIterator = DataContainer.dictionary.entrySet().iterator();
+			}
+			Map.Entry<String, WordSyllables> testDictWord = sampleIterator.next();
+			Set<Pair<String, Integer>> positives = GeneticMain.score_data.get(testDictWord.getKey());
+			while (positives == null) {
+				if (!sampleIterator.hasNext()) {
+					sampleIterator = DataContainer.dictionary.entrySet().iterator();
+				}
+				testDictWord = sampleIterator.next();
+				positives = GeneticMain.score_data.get(testDictWord.getKey());
+			}
+
+			LL_Rhymer temp = new LL_Rhymer(tables, this);
+			for (Pair<String, Integer> positive : positives) {
+				double rzScore = positive.getSecond() / 100.0;
+				List<WordSyllables> positivePronunciations = Phoneticizer.getSyllables(positive.getFirst());
+				if (positivePronunciations == null || positivePronunciations.isEmpty()) continue;
+				WordSyllables positivePronunciation = positivePronunciations.get(0);
+				if (positivePronunciation.isEmpty()) continue;
+				double endSyllablesScore = temp.score2Syllables(positivePronunciation.get(positivePronunciation.size() - 1), testDictWord.getValue().get(testDictWord.getValue().size() - 1));//TODO change to entire rhyme tail?????
+				error_sum += calculate1SqError(rzScore, endSyllablesScore);
+				total_iterations++;
+			}
+		}
+
+		double result = calculateMeanSqError(error_sum, total_iterations);
+		return result;
+	}
+
+	public static double calculate1SqError(double rzScore, double indivScore) {
+		return Math.pow(rzScore - indivScore, 2);
+	}
+
+	public double calculateMeanSqError(double error_sum, int iterations) {
+		double mse = error_sum / ((double) iterations);
+		this.setMean_sq_error(mse);
+		return mse;
 	}
 
 }

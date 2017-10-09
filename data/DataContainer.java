@@ -8,6 +8,7 @@ import java.util.*;
 import main.*;
 import phonetics.*;
 import phonetics.syllabic.*;
+import utils.Pair;
 
 public abstract class DataContainer {
 
@@ -18,11 +19,12 @@ public abstract class DataContainer {
 	private final static String rhymeZoneAdv = datamuseBase + "arhy=1&md=f&sl=";
 	public final static int size = 10000;
 
-	public static Dataset rhymeZonePerfRhymes = new Dataset();
-	public static Dataset rhymeZoneNearRhymes = new Dataset();
-	public static Dataset rhymeZoneSoundsLike = new Dataset();
-	public static Dataset rhymeZoneAdvanced = new Dataset();
-	public static Dataset hirjeeRapRhymes = new Dataset();
+	public static SimpleDataset rhymeZonePerfRhymes = new SimpleDataset();
+	public static SimpleDataset rhymeZoneNearRhymes = new SimpleDataset();
+	public static SimpleDataset rhymeZoneSoundsLike = new SimpleDataset();
+	public static SimpleDataset rhymeZoneAdvanced = new SimpleDataset();
+	public static ScoreDataset rhymeZoneScoredAdvanced = new ScoreDataset();
+	public static SimpleDataset hirjeeRapRhymes = new SimpleDataset();
 
 	public static Map<String,WordSyllables> dictionary = new HashMap<>();
 	public static Set<String> RZdictionary = new HashSet<>();
@@ -40,7 +42,7 @@ public abstract class DataContainer {
 //		rhymeZonePerfRhymes = DataLoader.loadDataset("RZ-perfect", rhymeZonePerf, size);
 //		rhymeZoneNearRhymes = DataLoader.loadDataset("RZ-near", rhymeZoneNear, size);
 //		rhymeZoneSoundsLike = DataLoader.loadDataset("RZ-sounds", rhymeZoneSounds, size);
-		rhymeZoneAdvanced = DataLoader.loadDataset("RZ-adv", rhymeZoneAdv, size);
+		rhymeZoneScoredAdvanced = DataLoader.loadScoredDataset("RZ-adv", rhymeZoneAdv, size);
 	}
 
 	private static void deserializeDatasets() {
@@ -57,11 +59,21 @@ public abstract class DataContainer {
 		rhymeZoneAdvanced.clean();
 	}
 
-	public static void setupRzDict(Dataset dataset) {
+	public static void setupRzDict(SimpleDataset dataset) {
 		RZdictionary = new HashSet<>();
 		for (Map.Entry<String,Set<String>> entry : dataset.entrySet()) {
 			RZdictionary.add(entry.getKey());
 			RZdictionary.addAll(entry.getValue());
+		}
+	}
+
+	public static void setupRzDict(ScoreDataset dataset) {
+		RZdictionary = new HashSet<>();
+		for (Map.Entry<String,Set<Pair<String,Integer>>> entry : dataset.entrySet()) {
+			RZdictionary.add(entry.getKey());
+			for (Pair<String,Integer> pair : entry.getValue()) {
+				RZdictionary.add(pair.getFirst());
+			}
 		}
 	}
 

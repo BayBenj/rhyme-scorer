@@ -5,12 +5,9 @@ import java.util.*;
 
 import data.DataContainer;
 import data.DataLoader;
-import data.Dataset;
-import data.HttpInterface;
-import org.json.JSONException;
-import org.json.JSONObject;
+import data.ScoreDataset;
+import data.SimpleDataset;
 import phonetics.ConsonantPhoneme;
-import phonetics.Phoneticizer;
 import phonetics.VowelPhoneme;
 import phonetics.syllabic.LL_Rhymer;
 import phonetics.syllabic.Syllable;
@@ -18,6 +15,7 @@ import phonetics.syllabic.SyllableList;
 import phonetics.syllabic.WordSyllables;
 import ben_alignment.*;
 import tables.*;
+import utils.Pair;
 
 public abstract class Main {
 
@@ -28,54 +26,57 @@ public abstract class Main {
 		setupRootPath();
 		DataContainer.setupDict();
 
-		DataContainer.rhymeZoneAdvanced = DataLoader.deserializeRhymes("RZ-adv", DataContainer.size);
-		DataContainer.rhymeZoneAdvanced.clean();
+		DataContainer.rhymeZoneScoredAdvanced = DataLoader.deserializeScoredRhymes("RZ-adv", DataContainer.size);
+		DataContainer.rhymeZoneScoredAdvanced.clean();
 
-		DataContainer.setupRzDict(DataContainer.rhymeZoneAdvanced);
-		Dataset randomRzMatches = getRandomRzMatches();
+		DataContainer.setupRzDict(DataContainer.rhymeZoneScoredAdvanced);
 
-		//monophonemic
-		System.out.println("\n\nMONOPHONEMIC (consonants and vowels)");
-		MonoTables randoms = findMonoCountsOnly(randomRzMatches);
-		MonoTables rhymes = findMonoCountsOnly(DataContainer.rhymeZoneAdvanced);
-		randoms.foldAll();
-		rhymes.foldAll();
+		finalTables = deserializeTables();
 
-		System.out.println("\n\nVOWELS");
-//		System.out.println("\n\nNear rhyme counts: " + rhymes.vowelTables.heightTable.total() + " total matches");
-//		rhymes.vowelTables.printCounts();
-//		System.out.println("\n\nRandom counts: " + randoms.vowelTables.frontnessTable.total() + " total matches");
-//		randoms.vowelTables.printCounts();
-		VowelTables mono_ll_vowel_tables = VowelTables.getLogLikelihoodTables(randoms.vowelTables, rhymes.vowelTables);
-		mono_ll_vowel_tables.LL_table_printLL();
-
-		System.out.println("\n\nCONSONANTS");
-//		System.out.println("\n\nNear rhyme counts: " + rhymes.consonantTables.mannerTable.total() + " total matches");
-//		rhymes.consonantTables.printCounts();
-//		System.out.println("\n\nRandom counts: " + randoms.consonantTables.mannerTable.total() + " total matches");
-//		randoms.consonantTables.printCounts();
-		MonoConsonantTables mono_ll_consonant_tables = MonoConsonantTables.getLogLikelihoodTables(randoms.consonantTables, rhymes.consonantTables);
-		mono_ll_consonant_tables.LL_table_printLL();
-
-		//multiphonemic
-		System.out.println("\n\nMULTIPHONEMIC (consonants only)");
-		MultiTables randoms2 = findAllCounts(randomRzMatches, mono_ll_consonant_tables);
-		MultiTables rhymes2 = findAllCounts(DataContainer.rhymeZoneAdvanced, mono_ll_consonant_tables);
-		randoms2.foldAll();
-		rhymes2.foldAll();
-
-		System.out.println("\n\nNear rhyme counts: " + rhymes2.consonantTables.mannerTable.total() + " total matches");
-		rhymes2.consonantTables.printCounts();
-		System.out.println("\n\nRandom counts: " + randoms2.consonantTables.mannerTable.total() + " total matches");
-		randoms2.consonantTables.printCounts();
-		MultiConsonantTables multi_ll_tables = MultiConsonantTables.getLogLikelihoodTables(randoms2.consonantTables, rhymes2.consonantTables);
-		multi_ll_tables.LL_table_printLL();
-
-		finalTables = new MultiTables(multi_ll_tables, mono_ll_vowel_tables);
-
-		serializeTables(finalTables);
-
-		LL_Rhymer.test(finalTables);
+//		SimpleDataset randomRzMatches = getRandomRzMatches();
+//
+//		//monophonemic
+//		System.out.println("\n\nMONOPHONEMIC (consonants and vowels)");
+//		MonoTables randoms = findMonoCountsOnly(randomRzMatches);
+//		MonoTables rhymes = findMonoCountsOnly(DataContainer.rhymeZoneScoredAdvanced);
+//		randoms.foldAll();
+//		rhymes.foldAll();
+//
+//		System.out.println("\n\nVOWELS");
+////		System.out.println("\n\nNear rhyme counts: " + rhymes.vowelTables.heightTable.total() + " total matches");
+////		rhymes.vowelTables.printCounts();
+////		System.out.println("\n\nRandom counts: " + randoms.vowelTables.frontnessTable.total() + " total matches");
+////		randoms.vowelTables.printCounts();
+//		VowelTables mono_ll_vowel_tables = VowelTables.getLogLikelihoodTables(randoms.vowelTables, rhymes.vowelTables);
+//		mono_ll_vowel_tables.LL_table_printLL();
+//
+//		System.out.println("\n\nCONSONANTS");
+////		System.out.println("\n\nNear rhyme counts: " + rhymes.consonantTables.mannerTable.total() + " total matches");
+////		rhymes.consonantTables.printCounts();
+////		System.out.println("\n\nRandom counts: " + randoms.consonantTables.mannerTable.total() + " total matches");
+////		randoms.consonantTables.printCounts();
+//		MonoConsonantTables mono_ll_consonant_tables = MonoConsonantTables.getLogLikelihoodTables(randoms.consonantTables, rhymes.consonantTables);
+//		mono_ll_consonant_tables.LL_table_printLL();
+//
+//		//multiphonemic
+//		System.out.println("\n\nMULTIPHONEMIC (consonants only)");
+//		MultiTables randoms2 = findAllCounts(randomRzMatches, mono_ll_consonant_tables);
+//		MultiTables rhymes2 = findAllCounts(DataContainer.rhymeZoneScoredAdvanced, mono_ll_consonant_tables);
+//		randoms2.foldAll();
+//		rhymes2.foldAll();
+//
+//		System.out.println("\n\nNear rhyme counts: " + rhymes2.consonantTables.mannerTable.total() + " total matches");
+//		rhymes2.consonantTables.printCounts();
+//		System.out.println("\n\nRandom counts: " + randoms2.consonantTables.mannerTable.total() + " total matches");
+//		randoms2.consonantTables.printCounts();
+//		MultiConsonantTables multi_ll_tables = MultiConsonantTables.getLogLikelihoodTables(randoms2.consonantTables, rhymes2.consonantTables);
+//		multi_ll_tables.LL_table_printLL();
+//
+//		finalTables = new MultiTables(multi_ll_tables, mono_ll_vowel_tables);
+//
+//		serializeTables(finalTables);
+//
+//		LL_Rhymer.test(finalTables);
 	}
 
 	public static void serializeTables(MultiTables tables) {
@@ -114,8 +115,8 @@ public abstract class Main {
 		return result;
 	}
 
-	public static Dataset getRandomRzMatches() {
-		Dataset result = new Dataset();
+	public static SimpleDataset getRandomRzMatches() {
+		SimpleDataset result = new SimpleDataset();
 		Iterator<String> iterator = DataContainer.RZdictionary.iterator();
 		for (String s1 : DataContainer.RZdictionary) {
 			String s2;
@@ -144,7 +145,19 @@ public abstract class Main {
 		return result;
 	}
 
-	public static MonoTables findMonoCountsOnly(Dataset dataset) {
+	public static MonoTables findMonoCountsOnly(ScoreDataset dataset) {
+		SimpleDataset result = new SimpleDataset();
+		for (Map.Entry<String, Set<Pair<String,Integer>>> entry : dataset.entrySet()) {
+			Set<String> set = new HashSet<>();
+			for (Pair<String,Integer> pair : entry.getValue()) {
+				set.add(pair.getFirst());
+			}
+			result.put(entry.getKey(), set);
+		}
+		return findMonoCountsOnly(result);
+	}
+
+	public static MonoTables findMonoCountsOnly(SimpleDataset dataset) {
 		MonoConsonantTables consonantResult = new MonoConsonantTables(new MonoMannerTable(), new MonoPlaceTable(), new MonoVoicingTable());
 		VowelTables vowelResult = new VowelTables(new HeightTable(), new FrontnessTable(), new RoundnessTable(), new TensionTable(), new StressTable());
 		for (Map.Entry<String,Set<String>> entry : dataset.entrySet()) {
@@ -194,7 +207,19 @@ public abstract class Main {
 		return new MonoTables(consonantResult, vowelResult);
 	}
 
-	public static MultiTables findAllCounts(Dataset dataset, MonoConsonantTables monoLLTables) {
+	public static MultiTables findAllCounts(ScoreDataset dataset, MonoConsonantTables monoLLTables) {
+		SimpleDataset result = new SimpleDataset();
+		for (Map.Entry<String, Set<Pair<String,Integer>>> entry : dataset.entrySet()) {
+			Set<String> set = new HashSet<>();
+			for (Pair<String,Integer> pair : entry.getValue()) {
+				set.add(pair.getFirst());
+			}
+			result.put(entry.getKey(), set);
+		}
+		return findAllCounts(result, monoLLTables);
+	}
+
+	public static MultiTables findAllCounts(SimpleDataset dataset, MonoConsonantTables monoLLTables) {
 		MultiConsonantTables consonantResult = new MultiConsonantTables(new MultiMannerTable(), new MultiPlaceTable(), new MultiVoicingTable());
 		VowelTables vowelResult = new VowelTables(new HeightTable(), new FrontnessTable(), new RoundnessTable(), new TensionTable(), new StressTable());
 		for (Map.Entry<String,Set<String>> entry : dataset.entrySet()) {
