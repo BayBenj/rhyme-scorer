@@ -33,13 +33,13 @@ public class LL_Rhymer {
 		MultiTables tables = Main.deserializeTables();
 		tables.consonantTables.LL_table_printLL();
 		tables.vowelTables.LL_table_printLL();
-		//test(tables);
-		String word = "berry";
-		Set<String> rhymes = rhymesByThresholds(1.0, 1.0, tables, word);
-		System.out.println("RHYMES W/ " + word);
-		for (String s : rhymes) {
-			System.out.println("\t" + s);
-		}
+		test(tables);
+//		String word = "berry";
+//		Set<String> rhymes = rhymesByThresholds(1.0, 1.0, tables, word);
+//		System.out.println("RHYMES W/ " + word);
+//		for (String s : rhymes) {
+//			System.out.println("\t" + s);
+//		}
 	}
 
 	public LL_Rhymer(MultiTables ll_tables, double frontnessWeight, double heightWeight, double roundnessWeight, double tensionWeight, double stressWeight, double mannerWeight, double placeWeight, double voicingWeight, double onsetWeight, double nucleusWeight, double codaWeight) {
@@ -79,11 +79,12 @@ public class LL_Rhymer {
 	}
 
 	public static void test(MultiTables tables) {
-		oneTest(1, tables, "hold", "molds");
-		oneTest(2, tables, "holding", "molded");
-		oneTest(3, tables, "eating", "readings");
-		oneTest(4, tables, "station", "bacon");
-		oneTest(5, tables, "black", "white");
+		oneTest(1, tables, "legislator", "terminator");
+		oneTest(2, tables, "legislator", "alligator");
+		oneTest(3, tables, "legislator", "elevator");
+		oneTest(4, tables, "terminator", "alligator");
+		oneTest(5, tables, "terminator", "elevator");
+		oneTest(5, tables, "alligator", "elevator");
 	}
 
 	public static void oneTest(int n, MultiTables tables, String s1, String s2) {
