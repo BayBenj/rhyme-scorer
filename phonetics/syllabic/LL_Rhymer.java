@@ -79,12 +79,37 @@ public class LL_Rhymer {
 	}
 
 	public static void test(MultiTables tables) {
-		oneTest(1, tables, "legislator", "terminator");
-		oneTest(2, tables, "legislator", "alligator");
-		oneTest(3, tables, "legislator", "elevator");
-		oneTest(4, tables, "terminator", "alligator");
-		oneTest(5, tables, "terminator", "elevator");
-		oneTest(5, tables, "alligator", "elevator");
+		Set<String> words = new HashSet<>();
+		words.add("died");
+		words.add("room");
+		words.add("air");
+		words.add("storm");
+		words.add("dry");
+		words.add("firm");
+		words.add("king");
+		words.add("away");
+		words.add("be");
+		words.add("was");
+		words.add("fly");
+		words.add("buzz");
+		words.add("me");
+		words.add("then");
+		words.add("see");
+		int i = 0;
+		for (String s1 : words) {
+			for (String s2 : words) {
+				if (!s1.equals(s2)) {
+					oneTest(i, tables, s1, s2);
+				}
+				i++;
+			}
+		}
+//		oneTest(1, tables, "rock", "socks");
+//		oneTest(2, tables, "rock", "bricks");
+//		oneTest(3, tables, "rock", "blot");
+//		oneTest(4, tables, "socks", "bricks");
+//		oneTest(5, tables, "socks", "blot");
+//		oneTest(5, tables, "bricks", "blot");
 	}
 
 	public static void oneTest(int n, MultiTables tables, String s1, String s2) {

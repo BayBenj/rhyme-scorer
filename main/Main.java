@@ -73,10 +73,10 @@ public abstract class Main {
 //		multi_ll_tables.LL_table_printLL();
 //
 //		finalTables = new MultiTables(multi_ll_tables, mono_ll_vowel_tables);
-//
+
 //		serializeTables(finalTables);
-//
-//		LL_Rhymer.test(finalTables);
+
+		LL_Rhymer.test(finalTables);
 	}
 
 	public static void serializeTables(MultiTables tables) {
