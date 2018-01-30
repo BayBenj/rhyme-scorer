@@ -7,6 +7,9 @@ import genetic.Individual;
 import main.Main;
 import phonetics.*;
 import tables.MultiTables;
+import tables.ProbabilityTable;
+import tables.VowelTables;
+
 import java.util.*;
 
 public class LL_Rhymer {
@@ -104,8 +107,9 @@ public class LL_Rhymer {
 				i++;
 			}
 		}
-//		oneTest(1, tables, "rock", "socks");
-//		oneTest(2, tables, "rock", "bricks");
+
+//		oneTest(1, tables, "storm", "away");
+//		oneTest(2, tables, "buzz", "was");
 //		oneTest(3, tables, "rock", "blot");
 //		oneTest(4, tables, "socks", "bricks");
 //		oneTest(5, tables, "socks", "blot");
@@ -117,18 +121,18 @@ public class LL_Rhymer {
 		List<WordSyllables> w1 = (Phoneticizer.getSyllables(s1));
 		List<WordSyllables> w2 = (Phoneticizer.getSyllables(s2));
 		double ga_score = LL_Rhymer.score2WordsByGaOptimizedWeights(tables,w1.get(0),w2.get(0));
-		double weightless_score = LL_Rhymer.score2WordsWeightless(tables,w1.get(0),w2.get(0));
-		double experimental_score = LL_Rhymer.score2WordsByExperimentalWeights(tables,w1.get(0),w2.get(0));
+//		double weightless_score = LL_Rhymer.score2WordsWeightless(tables,w1.get(0),w2.get(0));
+//		double experimental_score = LL_Rhymer.score2WordsByExperimentalWeights(tables,w1.get(0),w2.get(0));
 		System.out.println("GA-optimized score for f(" + s1 + ", " + s2 + ") = " + ga_score);
-		System.out.println("zero weights score for f(" + s1 + ", " + s2 + ") = " + weightless_score);
-		System.out.println("experimental score for f(" + s1 + ", " + s2 + ") = " + experimental_score);
+//		System.out.println("zero weights score for f(" + s1 + ", " + s2 + ") = " + weightless_score);
+//		System.out.println("experimental score for f(" + s1 + ", " + s2 + ") = " + experimental_score);
 	}
 
 	public static Set<String> rhymesByThresholds(double min, double max, MultiTables tables, String s) {
 		Set<String> result = new HashSet<>();
 		WordSyllables w = (Phoneticizer.getSyllables(s)).get(0);
 		for (Map.Entry<String, WordSyllables> entry : DataContainer.dictionary.entrySet()) {
-			if (w.getRhymeTailFromStress().size() != entry.getValue().getRhymeTailFromStress().size()) continue;
+			if (w.getStressTail().size() != entry.getValue().getStressTail().size()) continue;
 			double score = score2WordsByGaOptimizedWeights(tables, w, entry.getValue());
 			if (score >= min && score <= max) {
 				result.add(entry.getKey());
@@ -158,6 +162,7 @@ public class LL_Rhymer {
 		map.put("coda", 87.89520831632227);
 
 		return map;
+//		return normalizeWeights(map);
 	}
 
 	public static Map<String,Double> getExperimentalWeights() {
@@ -178,6 +183,7 @@ public class LL_Rhymer {
 		map.put("coda", 87.89520831632227);
 
 		return map;
+//		return normalizeWeights(map);
 	}
 
 	public static Map<String,Double> getEqualWeights() {
@@ -198,6 +204,25 @@ public class LL_Rhymer {
 		map.put("coda", 1.0);
 
 		return map;
+//		return normalizeWeights(map);
+	}
+
+	public static Map<String,Double> normalizeWeights(Map<String,Double> weights) {
+		double max = Double.MIN_VALUE;
+		double min = Double.MAX_VALUE;
+		for (Map.Entry<String,Double> entry : weights.entrySet()) {
+			double d = entry.getValue();
+			if (d > max) {
+				max = d;
+			}
+			if (d < min) {
+				min = d;
+			}
+		}
+		for (Map.Entry<String,Double> entry : weights.entrySet()) {
+			entry.setValue((entry.getValue() - min) / (max - min));
+		}
+		return weights;
 	}
 
 	public static double score2SyllablesByExperimentalWeights(MultiTables tables, Syllable s1, Syllable s2) {
@@ -222,94 +247,95 @@ public class LL_Rhymer {
 	}
 
 	public static Double score2WordsByGaOptimizedWeights(MultiTables tables, WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
-				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
-		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
+		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
+				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
+		else if (word1.getStressTail().size() != word2.getStressTail().size()) {
 			System.out.println("ERROR: rhyme tails of of unequal length");
 			return null;
 		}
 		else {
-			SyllableList rhymeTail1 = word1.getRhymeTailFromStress();
-			SyllableList rhymeTail2 = word2.getRhymeTailFromStress();
+			SyllableList stressTail1 = word1.getStressTail();
+			SyllableList stressTail2 = word2.getStressTail();
 			double total = 0.0;
-			for (int i = 0; i < rhymeTail1.size(); i++) {
-				Syllable s1 = rhymeTail1.get(i);
-				Syllable s2 = rhymeTail2.get(i);
+			for (int i = 0; i < stressTail1.size(); i++) {
+				Syllable s1 = stressTail1.get(i);
+				Syllable s2 = stressTail2.get(i);
 				double syllablesScore;
 				if (s1.equals(s2)) syllablesScore = 1.0;
 				else syllablesScore = score2SyllablesByGaOptimizedWeights(tables, s1, s2);
+				System.out.println("syllablesScore " + i + ": " + syllablesScore);
 				total += syllablesScore;
 			}
-			return new Double(total / (double)rhymeTail1.size());
+			return new Double(total / (double)stressTail1.size());
 		}
 	}
 
 	public static Double score2WordsByExperimentalWeights(MultiTables tables, WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
-				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
-		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
+		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
+				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
+		else if (word1.getStressTail().size() != word2.getStressTail().size()) {
 			System.out.println("ERROR: rhyme tails of of unequal length");
 			return null;
 		}
 		else {
-			SyllableList rhymeTail1 = word1.getRhymeTailFromStress();
-			SyllableList rhymeTail2 = word2.getRhymeTailFromStress();
+			SyllableList stressTail1 = word1.getStressTail();
+			SyllableList stressTail2 = word2.getStressTail();
 			double total = 0.0;
-			for (int i = 0; i < rhymeTail1.size(); i++) {
-				Syllable s1 = rhymeTail1.get(i);
-				Syllable s2 = rhymeTail2.get(i);
+			for (int i = 0; i < stressTail1.size(); i++) {
+				Syllable s1 = stressTail1.get(i);
+				Syllable s2 = stressTail2.get(i);
 				double syllablesScore;
 				if (s1.equals(s2)) syllablesScore = 1.0;
 				else syllablesScore = score2SyllablesByExperimentalWeights(tables, s1, s2);
 				total += syllablesScore;
 			}
-			return new Double(total / (double)rhymeTail1.size());
+			return new Double(total / (double)stressTail1.size());
 		}
 	}
 
 	public static Double score2WordsWeightless(MultiTables tables, WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
-				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
-		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
+		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
+				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
+		else if (word1.getStressTail().size() != word2.getStressTail().size()) {
 			System.out.println("ERROR: rhyme tails of of unequal length");
 			return null;
 		}
 		else {
-			SyllableList rhymeTail1 = word1.getRhymeTailFromStress();
-			SyllableList rhymeTail2 = word2.getRhymeTailFromStress();
+			SyllableList stressTail1 = word1.getStressTail();
+			SyllableList stressTail2 = word2.getStressTail();
 			double total = 0.0;
-			for (int i = 0; i < rhymeTail1.size(); i++) {
-				Syllable s1 = rhymeTail1.get(i);
-				Syllable s2 = rhymeTail2.get(i);
+			for (int i = 0; i < stressTail1.size(); i++) {
+				Syllable s1 = stressTail1.get(i);
+				Syllable s2 = stressTail2.get(i);
 				double syllablesScore;
 				if (s1.equals(s2)) syllablesScore = 1.0;
 				else syllablesScore = score2SyllablesWeightless(tables, s1, s2);
 				total += syllablesScore;
 			}
-			return new Double(total / (double)rhymeTail1.size());
+			return new Double(total / (double)stressTail1.size());
 		}
 	}
 
 	public Double score2Words(WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
-				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
-		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
+		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
+				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
+		else if (word1.getStressTail().size() != word2.getStressTail().size()) {
 			System.out.println("ERROR: rhyme tails of of unequal length");
 			return null;
 		}
 		else {
-			SyllableList rhymeTail1 = word1.getRhymeTailFromStress();
-			SyllableList rhymeTail2 = word2.getRhymeTailFromStress();
+			SyllableList stressTail1 = word1.getStressTail();
+			SyllableList stressTail2 = word2.getStressTail();
 			double total = 0.0;
-			for (int i = 0; i < rhymeTail1.size(); i++) {
-				Syllable s1 = rhymeTail1.get(i);
-				Syllable s2 = rhymeTail2.get(i);
+			for (int i = 0; i < stressTail1.size(); i++) {
+				Syllable s1 = stressTail1.get(i);
+				Syllable s2 = stressTail2.get(i);
 				double syllablesScore;
 				if (s1.equals(s2)) syllablesScore = 1.0;
 				else syllablesScore = score2Syllables(s1, s2);
 				total += syllablesScore;
 			}
-			return new Double(total / (double)rhymeTail1.size());
+			return new Double(total / (double)stressTail1.size());
 		}
 	}
 
@@ -358,6 +384,10 @@ public class LL_Rhymer {
 			coda = coda_align.normalizedScore * codaWeight;
 		}
 
+		System.out.println("onset: " + onset);
+		System.out.println("nucleus: " + nucleus);
+		System.out.println("coda: " + coda);
+
 		//syllable
 		final double weightSum = onsetWeight2 + nucleusWeight + codaWeight2;
 		final double syllableScore = (nucleus + onset + coda) / weightSum;
@@ -368,28 +398,65 @@ public class LL_Rhymer {
 		if (ph1 == null && ph2 == null) return 1.0;
 		if (ph1 == null || ph2 == null) return 0;
 		if (ph1.equals(ph2)) return 1.0;
-		final int f1 = ll_tables.vowelTables.frontnessTable.getCoord(ph1.phonemeEnum.getFrontness());
-		final int h1 = ll_tables.vowelTables.heightTable.getCoord(ph1.phonemeEnum.getHeight());
-		final int r1 = ll_tables.vowelTables.roundnessTable.getCoord(ph1.phonemeEnum.getRoundness());
-		final int t1 = ll_tables.vowelTables.tensionTable.getCoord(ph1.phonemeEnum.getTension());
-		final int s1 = ll_tables.vowelTables.stressTable.getCoord(ph1.stress);
+		VowelTables tables = ll_tables.vowelTables;
+		final int f1 = tables.frontnessTable.getCoord(ph1.phonemeEnum.getFrontness());
+		final int h1 = tables.heightTable.getCoord(ph1.phonemeEnum.getHeight());
+		final int r1 = tables.roundnessTable.getCoord(ph1.phonemeEnum.getRoundness());
+		final int t1 = tables.tensionTable.getCoord(ph1.phonemeEnum.getTension());
+		final int s1 = tables.stressTable.getCoord(ph1.stress);
 
-		final int f2 = ll_tables.vowelTables.frontnessTable.getCoord(ph2.phonemeEnum.getFrontness());
-		final int h2 = ll_tables.vowelTables.heightTable.getCoord(ph2.phonemeEnum.getHeight());
-		final int r2 = ll_tables.vowelTables.roundnessTable.getCoord(ph2.phonemeEnum.getRoundness());
-		final int t2 = ll_tables.vowelTables.tensionTable.getCoord(ph2.phonemeEnum.getTension());
-		final int s2 = ll_tables.vowelTables.stressTable.getCoord(ph2.stress);
+		final int f2 = tables.frontnessTable.getCoord(ph2.phonemeEnum.getFrontness());
+		final int h2 = tables.heightTable.getCoord(ph2.phonemeEnum.getHeight());
+		final int r2 = tables.roundnessTable.getCoord(ph2.phonemeEnum.getRoundness());
+		final int t2 = tables.tensionTable.getCoord(ph2.phonemeEnum.getTension());
+		final int s2 = tables.stressTable.getCoord(ph2.stress);
+
+		final double frontness = this.normalizedScore(tables.frontnessTable, f1,f2);
+		final double height = this.normalizedScore(tables.frontnessTable, h1,h2);
+		final double roundness = this.normalizedScore(tables.frontnessTable, r1,r2);
+		final double tension = this.normalizedScore(tables.frontnessTable, t1,t2);
+		final double stress = this.normalizedScore(tables.frontnessTable, s1,s2);
 
 		final double scoreSum =
-				(ll_tables.vowelTables.frontnessTable.cell(f1,f2) * frontnessWeight) +
-				(ll_tables.vowelTables.heightTable.cell(h1,h2) * heightWeight) +
-				(ll_tables.vowelTables.roundnessTable.cell(r1,r2) * roundnessWeight) +
-				(ll_tables.vowelTables.tensionTable.cell(t1,t2) * tensionWeight) +
-				(ll_tables.vowelTables.stressTable.cell(s1,s2) * stressWeight);
+				(frontness * frontnessWeight) +
+				(height * heightWeight) +
+				(roundness * roundnessWeight) +
+				(tension * tensionWeight) +
+				(stress * stressWeight);
 
 		final double weightSum = frontnessWeight + heightWeight + roundnessWeight + tensionWeight + stressWeight;
 		final double result = scoreSum / weightSum;
+		System.out.println("vowel score: " + result);
 		return result;
+	}
+
+	//TODO: move these to the ProbabiityTable Class
+	public double normalizedScore(ProbabilityTable table, int x, int y) {
+		return (table.cell(x, y) - this.getMin(table)) / (this.getMax(table) - this.getMin(table));
+	}
+
+	private double getMax(ProbabilityTable table) {
+		double max = Double.MIN_VALUE;
+		for (int i = 0; i < table.get_i_size(); i++) {
+			for (int j = 0; j < table.get_j_size(); j++) {
+				if (i <= j && table.get(i).get(j) > max) {
+					max = table.get(i).get(j);
+				}
+			}
+		}
+		return max;
+	}
+
+	private double getMin(ProbabilityTable table) {
+		double min = Double.MAX_VALUE;
+		for (int i = 0; i < table.get_i_size(); i++) {
+			for (int j = 0; j < table.get_j_size(); j++) {
+				if (i <= j && table.get(i).get(j) < min) {
+					min = table.get(i).get(j);
+				}
+			}
+		}
+		return min;
 	}
 
 }

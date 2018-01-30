@@ -9,7 +9,7 @@ public class WordSyllables extends SyllableList implements Serializable {
 
 	//Pertains specifically to syllables in 1 word
 
-	public SyllableList getRhymeTailFromStress() {
+	public SyllableList getStressTail() {
 		//Find the most stressed syllable
 		int highestStress = Integer.MIN_VALUE;
 		int i = 0;

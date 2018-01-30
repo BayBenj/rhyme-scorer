@@ -76,17 +76,17 @@ public class Rhymer {
 	}
 
 	public Double score2Words(WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
-				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
-		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) return null;
+		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
+				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
+		else if (word1.getStressTail().size() != word2.getStressTail().size()) return null;
 		else {
 			double total = 0;
-			for (int i = 0; i < word1.getRhymeTailFromStress().size(); i++) {
+			for (int i = 0; i < word1.getStressTail().size(); i++) {
 				Syllable s1 = word1.get(i);
 				Syllable s2 = word2.get(i);
 				total += score2Syllables(s1, s2);
 			}
-			return new Double(total / (double)word1.getRhymeTailFromStress().size());
+			return new Double(total / (double)word1.getStressTail().size());
 		}
 	}
 

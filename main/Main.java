@@ -175,9 +175,9 @@ public abstract class Main {
 				}
 
 				//do counts of middle onsets and codas and nuclei
-				if (r1.getRhymeTailFromStress().size() == r2.getRhymeTailFromStress().size() && r1.getRhymeTailFromStress().size() > 1) {
-					SyllableList rt1 = r1.getRhymeTailFromStress();
-					SyllableList rt2 = r2.getRhymeTailFromStress();
+				if (r1.getStressTail().size() == r2.getStressTail().size() && r1.getStressTail().size() > 1) {
+					SyllableList rt1 = r1.getStressTail();
+					SyllableList rt2 = r2.getStressTail();
 					//monophonemic onsets in rhyme tail
 					for (int i = 0; i < rt1.size(); i++) {
 						Syllable syl1 = rt1.get(i);
@@ -243,9 +243,9 @@ public abstract class Main {
 				}
 
 				//do counts of middle onsets and codas and nuclei
-				if (r1.getRhymeTailFromStress().size() == r2.getRhymeTailFromStress().size() && r1.getRhymeTailFromStress().size() > 1) {
-					SyllableList rt1 = r1.getRhymeTailFromStress();
-					SyllableList rt2 = r2.getRhymeTailFromStress();
+				if (r1.getStressTail().size() == r2.getStressTail().size() && r1.getStressTail().size() > 1) {
+					SyllableList rt1 = r1.getStressTail();
+					SyllableList rt2 = r2.getStressTail();
 					//monophonemic onsets in rhyme tail
 					for (int i = 0; i < rt1.size(); i++) {
 						Syllable syl1 = rt1.get(i);
