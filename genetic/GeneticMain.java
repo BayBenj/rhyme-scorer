@@ -39,7 +39,7 @@ public class GeneticMain {
 //		data = DataContainer.rhymeZoneAdvanced;
 		score_data = DataContainer.rhymeZoneScoredAdvanced;
 
-		Map<String, Double> values = LL_Rhymer.getGaOptimizedWeights();
+		Map<String, Double> values = LL_Rhymer.get100Weights();
 
 		TreeSet<Individual> topIndividuals = new TreeSet<>();
 		for (int i = 0; i < topIndividualN; i++) {

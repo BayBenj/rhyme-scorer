@@ -34,15 +34,16 @@ public class LL_Rhymer {
 		Main.setupRootPath();
 		DataContainer.setupDict();
 		MultiTables tables = Main.deserializeTables();
-		tables.consonantTables.LL_table_printLL();
-		tables.vowelTables.LL_table_printLL();
-		test(tables);
-//		String word = "berry";
-//		Set<String> rhymes = rhymesByThresholds(1.0, 1.0, tables, word);
-//		System.out.println("RHYMES W/ " + word);
-//		for (String s : rhymes) {
-//			System.out.println("\t" + s);
-//		}
+//		tables.consonantTables.LL_table_printLL();
+//		tables.vowelTables.LL_table_printLL();
+//		test(tables);
+		String word = "keyboard";
+		Map<String, Double> rhymes = rhymesByThresholds(.95, 1.0, tables, word);
+		TreeMap<String, Double> map = sortMapByValue(rhymes);
+		System.out.println("RHYMES W/ " + word);
+		for (Map.Entry<String,Double> entry : map.entrySet()) {
+			System.out.println("\t" + entry.getKey() + "\t" + entry.getValue());
+		}
 	}
 
 	public LL_Rhymer(MultiTables ll_tables, double frontnessWeight, double heightWeight, double roundnessWeight, double tensionWeight, double stressWeight, double mannerWeight, double placeWeight, double voicingWeight, double onsetWeight, double nucleusWeight, double codaWeight) {
@@ -81,23 +82,59 @@ public class LL_Rhymer {
 		this.codaWeight = indiv.getValues().get("coda");
 	}
 
+	public static TreeMap<String, Double> sortMapByValue(Map<String, Double> map){
+		Comparator<String> comparator = new ValueComparator(map);
+		//TreeMap is a map sorted by its keys.
+		//The comparator is used to sort the TreeMap by keys.
+		TreeMap<String, Double> result = new TreeMap<>(comparator);
+		result.putAll(map);
+		return result;
+	}
+
+	// a comparator that compares Strings
+	static class ValueComparator implements Comparator<String>{
+
+		Map<String, Double> map = new HashMap<>();
+
+		public ValueComparator(Map<String, Double> map){
+			this.map.putAll(map);
+		}
+
+		@Override
+		public int compare(String s1, String s2) {
+			if(map.get(s1) >= map.get(s2)){
+				return -1;
+			}else{
+				return 1;
+			}
+		}
+	}
+
 	public static void test(MultiTables tables) {
 		Set<String> words = new HashSet<>();
-		words.add("died");
-		words.add("room");
-		words.add("air");
-		words.add("storm");
-		words.add("dry");
-		words.add("firm");
-		words.add("king");
-		words.add("away");
-		words.add("be");
-		words.add("was");
-		words.add("fly");
-		words.add("buzz");
-		words.add("me");
-		words.add("then");
-		words.add("see");
+		words.add("slant");
+		words.add("lies");
+		words.add("delight");
+		words.add("surprise");
+		words.add("eased");
+		words.add("kind");
+		words.add("blind");
+
+//		words.add("died");
+//		words.add("room");
+//		words.add("air");
+//		words.add("storm");
+//		words.add("dry");
+//		words.add("firm");
+//		words.add("king");
+//		words.add("away");
+//		words.add("be");
+//		words.add("was");
+//		words.add("fly");
+//		words.add("buzz");
+//		words.add("me");
+//		words.add("then");
+//		words.add("see");
 		int i = 0;
 		for (String s1 : words) {
 			for (String s2 : words) {
@@ -128,14 +165,14 @@ public class LL_Rhymer {
 //		System.out.println("experimental score for f(" + s1 + ", " + s2 + ") = " + experimental_score);
 	}
 
-	public static Set<String> rhymesByThresholds(double min, double max, MultiTables tables, String s) {
-		Set<String> result = new HashSet<>();
+	public static Map<String,Double> rhymesByThresholds(double min, double max, MultiTables tables, String s) {
+		Map<String,Double> result = new HashMap<>();
 		WordSyllables w = (Phoneticizer.getSyllables(s)).get(0);
 		for (Map.Entry<String, WordSyllables> entry : DataContainer.dictionary.entrySet()) {
-			if (w.getStressTail().size() != entry.getValue().getStressTail().size()) continue;
+			if (w.getRhymeTailFromStress().size() != entry.getValue().getRhymeTailFromStress().size()) continue;
 			double score = score2WordsByGaOptimizedWeights(tables, w, entry.getValue());
 			if (score >= min && score <= max) {
-				result.add(entry.getKey());
+				result.put(entry.getKey(), score);
 			}
 		}
 		return result;
@@ -147,19 +184,40 @@ public class LL_Rhymer {
 		//As of: Sep 17, 2017 at 3:05pm
 		//F score: 0.9600924
 
-		map.put("frontness", 47.447956271080265);
-		map.put("height", 151.347951581586);
-		map.put("roundness", 65.45199233466151);
-		map.put("tension", 118.49472506265411);
-		map.put("stress", 70.13142679317251);
+		map.put("frontness", 652.94814227208);
+		map.put("height", 1685.6992378582047);
+		map.put("roundness", 1790.3363291882497);
+		map.put("tension", 102.15861192785609);
+		map.put("stress", 730.8691224727166);
 
-		map.put("manner", 80.80378174654354);
-		map.put("place", 53.05358882143532);
-		map.put("voicing", 209.72933710435296);
+		map.put("manner", 1706.8579995167618);
+		map.put("place", 5.778357487807371);
+		map.put("voicing", 1828.879820873744);
 
-		map.put("onset", 40.938284197428366);
-		map.put("nucleus", 139.91228974321322);
-		map.put("coda", 87.89520831632227);
+		map.put("onset", 28.677071986019257);
+		map.put("nucleus", 652.879601960592);
+		map.put("coda", 31.2507357193095);
+
+		return map;
+//		return normalizeWeights(map);
+	}
+
+	public static Map<String,Double> get100Weights() {
+		Map<String,Double> map = new HashMap<>();
+
+		map.put("frontness", 100.0);
+		map.put("height", 100.0);
+		map.put("roundness", 100.0);
+		map.put("tension", 100.0);
+		map.put("stress", 100.0);
+
+		map.put("manner", 100.0);
+		map.put("place", 100.0);
+		map.put("voicing", 100.0);
+
+		map.put("onset", 100.0);
+		map.put("nucleus", 100.0);
+		map.put("coda", 100.0);
 
 		return map;
 //		return normalizeWeights(map);
@@ -247,15 +305,15 @@ public class LL_Rhymer {
 	}
 
 	public static Double score2WordsByGaOptimizedWeights(MultiTables tables, WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
-				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
-		else if (word1.getStressTail().size() != word2.getStressTail().size()) {
+		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
+				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
+		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
 			System.out.println("ERROR: rhyme tails of of unequal length");
 			return null;
 		}
 		else {
-			SyllableList stressTail1 = word1.getStressTail();
-			SyllableList stressTail2 = word2.getStressTail();
+			SyllableList stressTail1 = word1.getRhymeTailFromStress();
+			SyllableList stressTail2 = word2.getRhymeTailFromStress();
 			double total = 0.0;
 			for (int i = 0; i < stressTail1.size(); i++) {
 				Syllable s1 = stressTail1.get(i);
@@ -263,7 +321,7 @@ public class LL_Rhymer {
 				double syllablesScore;
 				if (s1.equals(s2)) syllablesScore = 1.0;
 				else syllablesScore = score2SyllablesByGaOptimizedWeights(tables, s1, s2);
-				System.out.println("syllablesScore " + i + ": " + syllablesScore);
+//				System.out.println("syllablesScore " + i + ": " + syllablesScore);
 				total += syllablesScore;
 			}
 			return new Double(total / (double)stressTail1.size());
@@ -271,15 +329,15 @@ public class LL_Rhymer {
 	}
 
 	public static Double score2WordsByExperimentalWeights(MultiTables tables, WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
-				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
-		else if (word1.getStressTail().size() != word2.getStressTail().size()) {
+		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
+				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
+		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
 			System.out.println("ERROR: rhyme tails of of unequal length");
 			return null;
 		}
 		else {
-			SyllableList stressTail1 = word1.getStressTail();
-			SyllableList stressTail2 = word2.getStressTail();
+			SyllableList stressTail1 = word1.getRhymeTailFromStress();
+			SyllableList stressTail2 = word2.getRhymeTailFromStress();
 			double total = 0.0;
 			for (int i = 0; i < stressTail1.size(); i++) {
 				Syllable s1 = stressTail1.get(i);
@@ -294,15 +352,15 @@ public class LL_Rhymer {
 	}
 
 	public static Double score2WordsWeightless(MultiTables tables, WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
-				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
-		else if (word1.getStressTail().size() != word2.getStressTail().size()) {
+		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
+				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
+		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
 			System.out.println("ERROR: rhyme tails of of unequal length");
 			return null;
 		}
 		else {
-			SyllableList stressTail1 = word1.getStressTail();
-			SyllableList stressTail2 = word2.getStressTail();
+			SyllableList stressTail1 = word1.getRhymeTailFromStress();
+			SyllableList stressTail2 = word2.getRhymeTailFromStress();
 			double total = 0.0;
 			for (int i = 0; i < stressTail1.size(); i++) {
 				Syllable s1 = stressTail1.get(i);
@@ -317,15 +375,15 @@ public class LL_Rhymer {
 	}
 
 	public Double score2Words(WordSyllables word1, WordSyllables word2) {
-		if (word1 == null || word2 == null || word1.getStressTail() == null || word2.getStressTail() == null ||
-				word1.getStressTail().isEmpty() || word2.getStressTail().isEmpty()) return null;
-		else if (word1.getStressTail().size() != word2.getStressTail().size()) {
+		if (word1 == null || word2 == null || word1.getRhymeTailFromStress() == null || word2.getRhymeTailFromStress() == null ||
+				word1.getRhymeTailFromStress().isEmpty() || word2.getRhymeTailFromStress().isEmpty()) return null;
+		else if (word1.getRhymeTailFromStress().size() != word2.getRhymeTailFromStress().size()) {
 			System.out.println("ERROR: rhyme tails of of unequal length");
 			return null;
 		}
 		else {
-			SyllableList stressTail1 = word1.getStressTail();
-			SyllableList stressTail2 = word2.getStressTail();
+			SyllableList stressTail1 = word1.getRhymeTailFromStress();
+			SyllableList stressTail2 = word2.getRhymeTailFromStress();
 			double total = 0.0;
 			for (int i = 0; i < stressTail1.size(); i++) {
 				Syllable s1 = stressTail1.get(i);
@@ -384,9 +442,9 @@ public class LL_Rhymer {
 			coda = coda_align.normalizedScore * codaWeight;
 		}
 
-		System.out.println("onset: " + onset);
-		System.out.println("nucleus: " + nucleus);
-		System.out.println("coda: " + coda);
+//		System.out.println("onset: " + onset);
+//		System.out.println("nucleus: " + nucleus);
+//		System.out.println("coda: " + coda);
 
 		//syllable
 		final double weightSum = onsetWeight2 + nucleusWeight + codaWeight2;
@@ -426,7 +484,7 @@ public class LL_Rhymer {
 
 		final double weightSum = frontnessWeight + heightWeight + roundnessWeight + tensionWeight + stressWeight;
 		final double result = scoreSum / weightSum;
-		System.out.println("vowel score: " + result);
+//		System.out.println("vowel score: " + result);
 		return result;
 	}
 
